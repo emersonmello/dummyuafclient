@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/emersonmello/dummyuafclient.svg?branch=master)](https://travis-ci.org/emersonmello/dummyuafclient)
 
 # Dummy FIDO UAF Client for Android
 
