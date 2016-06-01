@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -15,7 +17,9 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.view.View;
@@ -23,7 +27,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.ebayopensource.fido.uaf.client.op.Auth;
 import org.ebayopensource.fido.uaf.client.op.Dereg;
@@ -89,21 +92,45 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
 
         // Are you using a user authentication? No? I'm sorry, you have to.
         if (!mKeyguardManager.isKeyguardSecure()) {
-            Toast.makeText(this, getString(R.string.lockscreen), Toast.LENGTH_LONG).show();
-            return;
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.screenlock)
+                    .setMessage(R.string.screenlock_msg)
+                    .setPositiveButton(R.string.button_go_to_settings, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+                        }
+                    }).show();
+        } else {
+            // If fingerprint authentication is not available
+            if (!mFingerprintUiHelper.isFingerprintAuthAvailable(this)) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.fingerprint_not_enrolled)
+                        .setMessage(R.string.fingerprint_not_enrolled_msg)
+                        .setPositiveButton(R.string.button_go_to_settings, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+                            }
+                        }).show();
+            } else {
+                mFingerprintContent.setVisibility(View.VISIBLE);
+            }
         }
-        // If fingerprint authentication is not available
-        if (!mFingerprintUiHelper.isFingerprintAuthAvailable(this)) {
-            Toast.makeText(this,
-                    getString(R.string.fingerprint_use),
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        mFingerprintContent.setVisibility(View.VISIBLE);
+        this.callingIntent = getIntent();
+        final ProgressBar countdownPB = (ProgressBar) findViewById(R.id.countdown_progress_bar);
+        countdownPB.setProgress(100);
+        new CountDownTimer(10000, 100) {
+            public void onTick(long millisUntilFinished) {
+                countdownPB.setProgress(countdownPB.getProgress()-1);
+            }
+            public void onFinish() {
+                uafError(ErrorCode.USER_CANCELLED.getID(), null);
+            }
+        }.start();
     }
 
-    private void uafError(short errorCode, String uafintentType){
+    private void uafError(short errorCode, String uafintentType) {
         if (callingIntent != null) {
             Bundle bundle = new Bundle();
             String response = "";
@@ -121,7 +148,7 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
 
     @Override
     public void onError() {
-        uafError(ErrorCode.UNKNOWN.getID(),null);
+        uafError(ErrorCode.UNKNOWN.getID(), null);
         showProgress(false);
     }
 
@@ -151,7 +178,7 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
                     String channelBindings = (String) extras.get("channelBindings");
                     String inMsg = extract(message);
 
-                    if (inMsg.isEmpty()){
+                    if (inMsg.isEmpty()) {
                         uafError(ErrorCode.PROTOCOL_ERROR.getID(), UAFIntentType.UAF_OPERATION_RESULT.name());
                         return;
                     }
@@ -164,7 +191,7 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
                         callingIntent.putExtras(extras);
                         setResult(Activity.RESULT_OK, callingIntent);
                         finish();
-                    }else {
+                    } else {
 
                         showProgress(true);
                         appFacetId = this.getFacetIdFromCallingIntent();
@@ -181,9 +208,8 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
     }
 
 
-
     private void executeFIDOOperations(String inMsg, String trustedFacets) {
-        if (trustedFacets.isEmpty()){
+        if (trustedFacets.isEmpty()) {
             uafError(ErrorCode.PROTOCOL_ERROR.getID(), UAFIntentType.UAF_OPERATION_RESULT.name());
             return;
         }
@@ -260,7 +286,7 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
     public void onPause() {
         super.onPause();
         mFingerprintUiHelper.stopListening();
-        uafError(ErrorCode.USER_CANCELLED.getID(),null);
+        uafError(ErrorCode.USER_CANCELLED.getID(), null);
     }
 
     @Override
@@ -272,8 +298,16 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     this.onCreate(null);
                 } else {
-                    Toast.makeText(this, getString(R.string.fingerprint_permission),
-                            Toast.LENGTH_LONG).show();
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.requested_permission)
+                            .setMessage(R.string.fingerprint_permission)
+                            .setCancelable(true)
+                            .setNeutralButton(R.string.button_done, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            }).show();
                 }
                 return;
             }
@@ -338,7 +372,7 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
         protected void onCancelled() {
             mGetTrustedTask = null;
             showProgress(false);
-            uafError(ErrorCode.USER_CANCELLED.getID(),null);
+            uafError(ErrorCode.USER_CANCELLED.getID(), null);
         }
     }
 }
