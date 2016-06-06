@@ -46,7 +46,7 @@ public class Reg {
 		logger.info("  [UAF][2]Reg - KeyPair generated"+keyPair);
 		RegistrationRequestProcessor p = new RegistrationRequestProcessor();
 		RegistrationResponse[] ret = new RegistrationResponse[1];
-		RegistrationResponse regResponse = p.processRequest(getRegistrationRequest(uafMsg), keyPair, facetId);
+		RegistrationResponse regResponse = p.processRequest(getRegistrationRequest(uafMsg), keyPair, rpServerEndpoint ,facetId);
 		logger.info ("  [UAF][4]Reg - Reg Response Formed  ");
 		logger.info(regResponse.assertions[0].assertion);
 		logger.info ("  [UAF][6]Reg - done  ");

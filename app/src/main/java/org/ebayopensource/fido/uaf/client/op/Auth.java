@@ -29,13 +29,13 @@ public class Auth {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private Gson gson = new GsonBuilder().disableHtmlEscaping().create(); 
 	
-	public String auth (String uafMsg){
+	public String auth (String uafMsg, String rpServerEndpoint, String facetId){
 	logger.info ("  [UAF][1]Auth  ");
 	try {
 		logger.info("  [UAF][2]Auth - priv key retrieved");
 		AuthenticationRequestProcessor p = new AuthenticationRequestProcessor();
 		AuthenticationResponse[] ret = new AuthenticationResponse[1];
-		AuthenticationResponse regResponse = p.processRequest(getAuthRequest(uafMsg));
+		AuthenticationResponse regResponse = p.processRequest(getAuthRequest(uafMsg), rpServerEndpoint, facetId);
 		logger.info ("  [UAF][4]Auth - Auth Response Formed  ");
 		logger.info(regResponse.assertions[0].assertion);
 		logger.info ("  [UAF][6]Auth - done  ");

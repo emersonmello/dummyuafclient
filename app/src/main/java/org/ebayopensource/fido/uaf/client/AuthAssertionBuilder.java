@@ -43,13 +43,13 @@ public class AuthAssertionBuilder {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private FidoUafAuthenticator fidoUafAuthenticator = FidoUafAuthenticator.getInstance();
 
-	public String getAssertions(AuthenticationResponse response) throws Exception {
+	public String getAssertions(AuthenticationResponse response, String rpServerEndpoint) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
 
 		byteout.write(encodeInt(TagsEnum.TAG_UAFV1_AUTH_ASSERTION.id));
-		value = getAuthAssertion(response);
+		value = getAuthAssertion(response, rpServerEndpoint);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -59,7 +59,7 @@ public class AuthAssertionBuilder {
 		return ret;
 	}
 
-	private byte[] getAuthAssertion(AuthenticationResponse response) throws Exception {
+	private byte[] getAuthAssertion(AuthenticationResponse response, String rpServerEndpoint) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
@@ -73,7 +73,7 @@ public class AuthAssertionBuilder {
 		byte[] signedDataValue = byteout.toByteArray();
 
 		byteout.write(encodeInt(TagsEnum.TAG_SIGNATURE.id));
-		value = getSignature("testRP",signedDataValue);
+		value = getSignature(rpServerEndpoint,signedDataValue);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -143,29 +143,29 @@ public class AuthAssertionBuilder {
 
 	private byte[] getSignature(String keyalias, byte[] dataForSigning) throws Exception {
 
-		PublicKey pub =
-				KeyCodec.getPubKey(Base64.decode(Preferences.getSettingsParam("pub"), Base64.URL_SAFE));
-		PrivateKey priv =
-				KeyCodec.getPrivKey(Base64.decode(Preferences.getSettingsParam("priv"), Base64.URL_SAFE));
+//		PublicKey pub =
+//				KeyCodec.getPubKey(Base64.decode(Preferences.getSettingsParam("pub"), Base64.URL_SAFE));
+//		PrivateKey priv =
+//				KeyCodec.getPrivKey(Base64.decode(Preferences.getSettingsParam("priv"), Base64.URL_SAFE));
+//
+//		logger.info(" : dataForSigning : "
+//				+ Base64.encode(dataForSigning, Base64.URL_SAFE));
+//
+//		BigInteger[] signatureGen = NamedCurve.signAndFromatToRS(priv,
+//				SHA.sha(dataForSigning, "SHA-256"));
+//
+//		boolean verify = NamedCurve.verify(
+//				KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)pub),
+//				SHA.sha(dataForSigning, "SHA-256"),
+//				Asn1.decodeToBigIntegerArray(Asn1.getEncoded(signatureGen)));
+//		if (!verify) {
+//			throw new RuntimeException("Signatire match fail");
+//		}
 
-		logger.info(" : dataForSigning : "
-				+ Base64.encode(dataForSigning, Base64.URL_SAFE));
 
-		BigInteger[] signatureGen = NamedCurve.signAndFromatToRS(priv,
-				SHA.sha(dataForSigning, "SHA-256"));
+		byte[] ret = fidoUafAuthenticator.getRPSignature(keyalias,dataForSigning);
 
-		boolean verify = NamedCurve.verify(
-				KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)pub),
-				SHA.sha(dataForSigning, "SHA-256"),
-				Asn1.decodeToBigIntegerArray(Asn1.getEncoded(signatureGen)));
-		if (!verify) {
-			throw new RuntimeException("Signatire match fail");
-		}
-
-
-//		byte[] ret = fidoUafAuthenticator.getSignature(keyalias,dataForSigning);
-
-		byte[] ret = Asn1.toRawSignatureBytes(signatureGen);
+		//byte[] ret = Asn1.toRawSignatureBytes(signatureGen);
 		logger.info(" : signature : " + Base64.encode(ret, Base64.URL_SAFE));
 
 		return ret;

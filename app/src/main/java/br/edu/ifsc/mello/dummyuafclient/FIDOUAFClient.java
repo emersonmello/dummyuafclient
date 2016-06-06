@@ -232,7 +232,7 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
                 response = regOp.register(inMsg, rpServerEndpoint,appFacetId);
             } else if (inMsg.contains("\"Auth\"")) {
                 Auth authOp = new Auth();
-                response = authOp.auth(inMsg);
+                response = authOp.auth(inMsg, rpServerEndpoint,appFacetId);
             }
 
             extras.putShort("errorCode", NO_ERROR.getID());

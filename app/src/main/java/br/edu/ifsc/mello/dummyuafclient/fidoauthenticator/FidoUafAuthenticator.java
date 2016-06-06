@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
@@ -153,10 +154,10 @@ public class FidoUafAuthenticator {
             NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, CertificateException, UnrecoverableEntryException, KeyStoreException {
         mKeyStore.load(null);
 
-        KeyStore.Entry entry = mKeyStore.getEntry(keyName,null);
+        KeyStore.Entry entry = mKeyStore.getEntry(keyName, null);
         if (entry != null) {
             //TODO Should I return an error to Android RP app? Hey! You have to dereg first.
-            Log.i("createKeyPair","There is already a keypair for this RP endpoint. Ok it will be overwritten.");
+            Log.i("createKeyPair", "There is already a keypair for this RP endpoint. Ok it will be overwritten.");
         }
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
@@ -210,19 +211,21 @@ public class FidoUafAuthenticator {
 ////                Asn1.decodeToBigIntegerArray(Asn1.getEncoded(signatureGen)));
 //    }
 
-//    public byte[] getSignature(String keyAlias, byte[] dataForSigning) {
-//        try {
-//            mKeyStore.load(null);
-//            KeyStore.Entry entry = mKeyStore.getEntry(keyAlias, null);
-//            Signature s = Signature.getInstance("SHA256withECDSA");
-//            s.initSign(((KeyStore.PrivateKeyEntry) entry).getPrivateKey());
-//            s.update(dataForSigning);
-//            return s.sign();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    public byte[] getRPSignature(String keyAlias, byte[] dataForSigning) {
+        try {
+            mKeyStore.load(null);
+            KeyStore.Entry entry = mKeyStore.getEntry(keyAlias, null);
+            byte[] signature = null;
+            java.security.Signature s = java.security.Signature.getInstance("SHA256withECDSA");
+            s.initSign(((KeyStore.PrivateKeyEntry) entry).getPrivateKey());
+            s.update(SHA.sha(dataForSigning, "SHA-256"));
+            signature = s.sign();
+            return signature;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     private void fillDetails() {

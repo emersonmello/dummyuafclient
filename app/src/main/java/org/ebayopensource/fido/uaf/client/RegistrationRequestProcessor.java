@@ -34,7 +34,7 @@ import br.edu.ifsc.mello.dummyuafclient.fidoauthenticator.FidoUafAuthenticator;
 
 public class RegistrationRequestProcessor {
 	
-	public RegistrationResponse processRequest(RegistrationRequest regRequest, KeyPair keyPair, String facetId) {
+	public RegistrationResponse processRequest(RegistrationRequest regRequest, KeyPair keyPair, String rpServerEndpoint, String facetId) {
 		RegistrationResponse response = new RegistrationResponse();
 		RegAssertionBuilder builder = new RegAssertionBuilder(keyPair);
 		Gson gson = new Gson();
@@ -52,21 +52,17 @@ public class RegistrationRequestProcessor {
 		fcParams.challenge = regRequest.challenge;
 		response.fcParams = Base64.encodeToString(gson.toJson(
 				fcParams).getBytes(), Base64.URL_SAFE);
-		setAssertions(response,builder);
-		return response;
-	}
-
-	private void setAssertions(RegistrationResponse response, RegAssertionBuilder builder) {
 		response.assertions = new AuthenticatorRegistrationAssertion[1];
 		FidoUafAuthenticator fidoUafAuthenticator = FidoUafAuthenticator.getInstance();
 		try {
 			response.assertions[0] = new AuthenticatorRegistrationAssertion();
-			response.assertions[0].assertion = builder.getAssertions(response);
+			response.assertions[0].assertion = builder.getAssertions(response, rpServerEndpoint);
 			response.assertions[0].assertionScheme = fidoUafAuthenticator.getAuthenticatorDetails().assertionScheme;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		return response;
 	}
+
 
 }

@@ -55,13 +55,13 @@ public class RegAssertionBuilder {
 		this.keyPair  = keyPair;
 	}
 
-	public String getAssertions(RegistrationResponse response) throws Exception {
+	public String getAssertions(RegistrationResponse response, String rpServerEndpoint) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
 
 		byteout.write(encodeInt(TagsEnum.TAG_UAFV1_REG_ASSERTION.id));
-		value = getRegAssertion(response);
+		value = getRegAssertion(response, rpServerEndpoint);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -76,7 +76,7 @@ public class RegAssertionBuilder {
 		return ret;
 	}
 
-	private byte[] getRegAssertion(RegistrationResponse response) throws Exception {
+	private byte[] getRegAssertion(RegistrationResponse response, String rpServerEndpoint) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
@@ -90,7 +90,7 @@ public class RegAssertionBuilder {
 		byte[] signedDataValue = byteout.toByteArray();
 
 		byteout.write(encodeInt(TagsEnum.TAG_ATTESTATION_BASIC_FULL.id));
-		value = getAttestationBasicFull(signedDataValue);
+		value = getAttestationBasicFull(rpServerEndpoint, signedDataValue);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -98,12 +98,12 @@ public class RegAssertionBuilder {
 		return byteout.toByteArray();
 	}
 	
-	private byte[] getAttestationBasicFull (byte[] signedDataValue) throws Exception {
+	private byte[] getAttestationBasicFull (String rpServerEndpoint, byte[] signedDataValue) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
 		byteout.write(encodeInt(TagsEnum.TAG_SIGNATURE.id));
-		value = getSignature(signedDataValue);
+		value = getSignature(rpServerEndpoint, signedDataValue);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -170,33 +170,29 @@ public class RegAssertionBuilder {
 		return KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)this.keyPair.getPublic());
 	}
 
-	private byte[] getSignature(byte[] dataForSigning) throws Exception {
-
-//		PublicKey pub = KeyCodec.getPubKey(
-//				Base64.encode(this.keyPair.getPublic().getEncoded(), Base64.URL_SAFE))
-//				;
-//		PrivateKey priv = KeyCodec.getPrivKey(Base64
-//				.encode(this.keyPair.getPrivate().getEncoded(),Base64.URL_SAFE));
-//		PublicKey pub = this.keyPair.getPublic();
+	private byte[] getSignature(String rpServerEndpoint, byte[] dataForSigning) throws Exception {
 		PrivateKey priv =
 				KeyCodec.getPrivKey(Base64.decode(AttestCert.priv, Base64.URL_SAFE));
 				//this.keyPair.getPrivate();
 
-		logger.info(" : dataForSigning : "
-				+ Base64.encodeToString(dataForSigning, Base64.URL_SAFE));
+//		logger.info(" : dataForSigning : "
+//				+ Base64.encodeToString(dataForSigning, Base64.URL_SAFE));
+//
+//		BigInteger[] signatureGen = NamedCurve.signAndFromatToRS(priv,
+//				SHA.sha(dataForSigning, "SHA-256"));
+//
+//		boolean verify = NamedCurve.verify(
+//				KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)KeyCodec.getPubKey(Base64.decode(AttestCert.pubCert, Base64.URL_SAFE))),
+//				//KeyCodec.getKeyAsRawBytes((ECPublicKey)this.keyPair.getPublic()),
+//				SHA.sha(dataForSigning, "SHA-256"),
+//				Asn1.decodeToBigIntegerArray(Asn1.getEncoded(signatureGen)));
+//		if (!verify) {
+//			throw new RuntimeException("Signature match fail");
+//		}
+//		byte[] ret = Asn1.toRawSignatureBytes(signatureGen);
 
-		BigInteger[] signatureGen = NamedCurve.signAndFromatToRS(priv,
-				SHA.sha(dataForSigning, "SHA-256"));
+		byte[] ret = fidoUafAuthenticator.getRPSignature(rpServerEndpoint,dataForSigning);
 
-		boolean verify = NamedCurve.verify(
-				KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)KeyCodec.getPubKey(Base64.decode(AttestCert.pubCert, Base64.URL_SAFE))),
-				//KeyCodec.getKeyAsRawBytes((ECPublicKey)this.keyPair.getPublic()),
-				SHA.sha(dataForSigning, "SHA-256"),
-				Asn1.decodeToBigIntegerArray(Asn1.getEncoded(signatureGen)));
-		if (!verify) {
-			throw new RuntimeException("Signatire match fail");
-		}
-		byte[] ret = Asn1.toRawSignatureBytes(signatureGen);
 		logger.info(" : signature : " + Base64.encodeToString(ret, Base64.URL_SAFE));
 
 		return ret;

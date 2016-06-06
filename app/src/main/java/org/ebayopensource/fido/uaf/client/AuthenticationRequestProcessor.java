@@ -26,9 +26,13 @@ import org.ebayopensource.fido.uaf.msg.AuthenticatorSignAssertion;
 import org.ebayopensource.fido.uaf.msg.FinalChallengeParams;
 import org.ebayopensource.fido.uaf.msg.OperationHeader;
 
+import br.edu.ifsc.mello.dummyuafclient.fidoauthenticator.FidoUafAuthenticator;
+
 public class AuthenticationRequestProcessor {
+
+	private FidoUafAuthenticator fidoUafAuthenticator = FidoUafAuthenticator.getInstance();
 	
-	public AuthenticationResponse processRequest(AuthenticationRequest request) {
+	public AuthenticationResponse processRequest(AuthenticationRequest request, String rpServerEndpoint, String facetId) {
 		AuthenticationResponse response = new AuthenticationResponse();
 		AuthAssertionBuilder builder = new AuthAssertionBuilder();
 		Gson gson = new Gson();
@@ -42,30 +46,22 @@ public class AuthenticationRequestProcessor {
 
 		FinalChallengeParams fcParams = new FinalChallengeParams();
 		fcParams.appID = request.header.appID;
-		fcParams.facetID = getFacetId();
+		fcParams.facetID = facetId;
 		fcParams.challenge = request.challenge;
 		response.fcParams = Base64.encodeToString(gson.toJson(
 				fcParams).getBytes(), Base64.URL_SAFE);
-		setAssertions(response,builder);
-		return response;
-	}
 
-	private String getFacetId() {
-		return "";
-	}
-
-	private void setAssertions(AuthenticationResponse response, AuthAssertionBuilder builder) {
 		response.assertions = new AuthenticatorSignAssertion[1];
 		try {
 			response.assertions[0] = new AuthenticatorSignAssertion();
-			response.assertions[0].assertion = builder.getAssertions(response);
-			response.assertions[0].assertionScheme = "UAFV1TLV";
+			response.assertions[0].assertion = builder.getAssertions(response, rpServerEndpoint);
+			response.assertions[0].assertionScheme = fidoUafAuthenticator.getAuthenticatorDetails().assertionScheme;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		return response;
 	}
+
 
 
 
