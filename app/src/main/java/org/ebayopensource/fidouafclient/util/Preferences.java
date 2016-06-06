@@ -3,6 +3,8 @@ package org.ebayopensource.fidouafclient.util;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import br.edu.ifsc.mello.dummyuafclient.fidoauthenticator.FidoUafAuthenticator;
+
 public class Preferences {
 
 	private static String PREFERANCES = "Preferences";

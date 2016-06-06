@@ -57,10 +57,9 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
     private GetTrustedFacetsTask mGetTrustedTask;
     private ProgressBar mProgressBar;
     private Intent callingIntent;
-    private String[] appFacetId;
+    private String appFacetId;
 
     //TODO 1 key per RP Server (inheritance from eBay original project) - Move it from SharedPreferences to a HW Keystore+DB;
-    private static final String KEY_NAME = "dummy_key";
     private SharedPreferences mSharedPreferences;
 
     @Override
@@ -225,9 +224,12 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
             setResult(Activity.RESULT_CANCELED, callingIntent);
             finish();
         } else {
+            // TODO it is not FIDO standard behaviour, but it is a naive way to create a unique alias
+            // in Android Keystore for each RP server. It should include username, i.e.: URL/username
+            String rpServerEndpoint = callingIntent.getExtras().getString("rpServerEndpoint","");
             if (inMsg.contains("\"Reg\"")) {
                 Reg regOp = new Reg();
-                response = regOp.register(inMsg);
+                response = regOp.register(inMsg, rpServerEndpoint,appFacetId);
             } else if (inMsg.contains("\"Auth\"")) {
                 Auth authOp = new Auth();
                 response = authOp.auth(inMsg);
@@ -241,25 +243,29 @@ public class FIDOUAFClient extends AppCompatActivity implements FingerprintUiHel
         }
     }
 
-    private String[] getFacetIdFromCallingIntent() {
-        String[] results = null;
+    private String getFacetIdFromCallingIntent() {
+        StringBuilder results = new StringBuilder();
         try {
             PackageInfo packageInfo = this.getPackageManager().getPackageInfo(getCallingPackage(), PackageManager.GET_SIGNATURES);
-            results = new String[packageInfo.signatures.length];
             int i = 0;
             for (Signature sign : packageInfo.signatures) {
                 MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
                 messageDigest.update(sign.toByteArray());
                 String currentSignature = Base64.encodeToString(messageDigest.digest(), Base64.DEFAULT);
-                String facetID = "android:apk-key-hash:" + currentSignature.substring(0, currentSignature.length() - 2);
-                results[i++] = facetID;
+                String comma = "";
+                if ((packageInfo.signatures.length > 1) && (i<packageInfo.signatures.length)){
+                    comma = ",";
+                }
+                String facetID = "android:apk-key-hash:" + currentSignature.substring(0, currentSignature.length() - 2) + comma;
+                results.append(facetID);
+                i++;
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        return results;
+        return results.toString();
     }
 
 

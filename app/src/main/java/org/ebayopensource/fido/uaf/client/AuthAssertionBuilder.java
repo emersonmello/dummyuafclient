@@ -36,9 +36,12 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.logging.Logger;
 
+import br.edu.ifsc.mello.dummyuafclient.fidoauthenticator.FidoUafAuthenticator;
+
 public class AuthAssertionBuilder {
 
 	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private FidoUafAuthenticator fidoUafAuthenticator = FidoUafAuthenticator.getInstance();
 
 	public String getAssertions(AuthenticationResponse response) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
@@ -70,7 +73,7 @@ public class AuthAssertionBuilder {
 		byte[] signedDataValue = byteout.toByteArray();
 
 		byteout.write(encodeInt(TagsEnum.TAG_SIGNATURE.id));
-		value = getSignature(signedDataValue);
+		value = getSignature("testRP",signedDataValue);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -138,17 +141,12 @@ public class AuthAssertionBuilder {
 		return byteout.toByteArray();
 	}
 
-	private byte[] getSignature(byte[] dataForSigning) throws Exception {
+	private byte[] getSignature(String keyalias, byte[] dataForSigning) throws Exception {
 
-//		PublicKey pub = KeyCodec.getPubKey(Base64
-//				.decodeBase64(TestData.TEST_PUB_KEY));
-		
 		PublicKey pub =
 				KeyCodec.getPubKey(Base64.decode(Preferences.getSettingsParam("pub"), Base64.URL_SAFE));
 		PrivateKey priv =
 				KeyCodec.getPrivKey(Base64.decode(Preferences.getSettingsParam("priv"), Base64.URL_SAFE));
-//				KeyCodec.getPrivKey(Base64
-//				.decodeBase64(TestData.TEST_PRIV_KEY));
 
 		logger.info(" : dataForSigning : "
 				+ Base64.encode(dataForSigning, Base64.URL_SAFE));
@@ -157,12 +155,16 @@ public class AuthAssertionBuilder {
 				SHA.sha(dataForSigning, "SHA-256"));
 
 		boolean verify = NamedCurve.verify(
-				KeyCodec.getKeyAsRawBytes((ECPublicKey)pub),
+				KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)pub),
 				SHA.sha(dataForSigning, "SHA-256"),
 				Asn1.decodeToBigIntegerArray(Asn1.getEncoded(signatureGen)));
 		if (!verify) {
 			throw new RuntimeException("Signatire match fail");
 		}
+
+
+//		byte[] ret = fidoUafAuthenticator.getSignature(keyalias,dataForSigning);
+
 		byte[] ret = Asn1.toRawSignatureBytes(signatureGen);
 		logger.info(" : signature : " + Base64.encode(ret, Base64.URL_SAFE));
 
@@ -179,7 +181,7 @@ public class AuthAssertionBuilder {
 
 	private byte[] getAAID() throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
-		byte[] value = "EBA0#0001".getBytes();
+		byte[] value = fidoUafAuthenticator.getAuthenticatorDetails().aaid.getBytes();
 		byteout.write(value);
 		return byteout.toByteArray();
 	}

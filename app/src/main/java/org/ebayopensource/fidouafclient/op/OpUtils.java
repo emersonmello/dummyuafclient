@@ -40,20 +40,20 @@ public abstract class OpUtils {
      * @param isTrx             always false for Registration messages. For Authentication it should be true only for transactions
      * @return uafProtocolMessage
      */
-    public static String getUafRequest(String serverResponse, String trustedFacetsJson, String[] appFacetId, boolean isTrx) {
+    public static String getUafRequest(String serverResponse, String trustedFacetsJson, String appFacetId, boolean isTrx) {
         String msg = "{\"uafProtocolMessage\":\"";
         try {
             JSONArray requestArray = new JSONArray(serverResponse);
             String appID = ((JSONObject) requestArray.get(0)).getJSONObject("header").getString("appID");
             Version version = (new Gson()).fromJson(((JSONObject) requestArray.get(0)).getJSONObject("header").getString("upv"), Version.class);
             String facetId = "";
-            if (appFacetId.length > 0) {
-                facetId = appFacetId[0];
+            if (!appFacetId.isEmpty()) {
+                facetId = appFacetId.split(",")[0];
             }
             // If the AppID is null or empty, the client MUST set the AppID to be the FacetID of
             // the caller, and the operation may proceed without additional processing.
             if (appID == null || appID.isEmpty()) {
-                if (appFacetId.length > 0) {
+                if (!appFacetId.isEmpty()) {
                     ((JSONObject) requestArray.get(0)).getJSONObject("header").put("appID", facetId);
                 }
             } else {
@@ -90,8 +90,9 @@ public abstract class OpUtils {
         return getEmptyUafMsgRegRequest();
     }
 
-    private static boolean isAppIdEqualsFacetId(String[] appFacetIds, String appID) {
-        for (String facet : appFacetIds) {
+    private static boolean isAppIdEqualsFacetId(String appFacetIds, String appID) {
+        String[] searchHelper = appFacetIds.split(",");
+        for (String facet : searchHelper) {
             if (facet.equals(appID)) {
                 return true;
             }
@@ -134,14 +135,15 @@ public abstract class OpUtils {
      * @param appFacetId
      * @return true if appID list contains facetId (current Android application's signature).
      */
-    private static boolean processTrustedFacetsList(TrustedFacetsList trustedFacetsList, Version version, String[] appFacetId) {
+    private static boolean processTrustedFacetsList(TrustedFacetsList trustedFacetsList, Version version, String appFacetId) {
         for (TrustedFacets trustedFacets : trustedFacetsList.getTrustedFacets()) {
             // select the one with the version matching that of the protocol message version
             if ((trustedFacets.getVersion().minor >= version.minor)
                     && (trustedFacets.getVersion().major <= version.major)) {
                 //The scheme of URLs in ids MUST identify either an application identity
                 // (e.g. using the apk:, ios: or similar scheme) or an https: Web Origin [RFC6454].
-                for (String facetId : appFacetId) {
+                String[] searchHelper = appFacetId.split(",");
+                for (String facetId : searchHelper) {
                     for (String id : trustedFacets.getIds()) {
                         if (id.equals(facetId)) {
                             return true;

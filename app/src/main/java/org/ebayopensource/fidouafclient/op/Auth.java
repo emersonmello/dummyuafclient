@@ -51,7 +51,7 @@ public class Auth {
 		return ret;
 	}
 
-	public String getUafMsgRequest(String trustedFacetsJson, String[] appFacetId, boolean isTrx) {
+	public String getUafMsgRequest(String trustedFacetsJson, String appFacetId, boolean isTrx) {
 		String serverResponse = getAuthRequest();
 		return OpUtils.getUafRequest(serverResponse, trustedFacetsJson, appFacetId, isTrx);
 	}

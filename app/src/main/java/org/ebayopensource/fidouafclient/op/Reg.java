@@ -40,7 +40,7 @@ public class Reg {
 	
 	private Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-	public String getUafMsgRegRequest(String username, String trustedFacetsJson, String[] appFacetId, Context context) {
+	public String getUafMsgRegRequest(String username, String trustedFacetsJson, String appFacetId, Context context) {
 		String serverResponse = getRegRequest(username);
 		return OpUtils.getUafRequest(serverResponse, trustedFacetsJson, appFacetId, false);
 	}

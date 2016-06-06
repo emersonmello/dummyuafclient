@@ -28,6 +28,8 @@ import org.ebayopensource.fido.uaf.msg.Version;
 
 import java.util.logging.Logger;
 
+import br.edu.ifsc.mello.dummyuafclient.fidoauthenticator.FidoUafAuthenticator;
+
 public class Dereg {
 	
 	private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -43,7 +45,8 @@ public class Dereg {
 		reg.header.appID = Preferences.getSettingsParam("appID");
 		reg.authenticators = new DeregisterAuthenticator[1];
 		DeregisterAuthenticator deregAuth = new DeregisterAuthenticator();
-		deregAuth.aaid = RegAssertionBuilder.AAID;
+		FidoUafAuthenticator fidoUafAuthenticator = FidoUafAuthenticator.getInstance();
+		deregAuth.aaid = fidoUafAuthenticator.getAuthenticatorDetails().aaid;
 		String tmp = Preferences.getSettingsParam("keyId");
 		byte[] bytes = tmp.getBytes();
 		deregAuth.keyID = tmp;

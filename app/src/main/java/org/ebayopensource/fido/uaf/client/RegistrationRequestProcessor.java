@@ -29,16 +29,16 @@ import org.ebayopensource.fidouafclient.util.Preferences;
 
 import java.security.KeyPair;
 
+import br.edu.ifsc.mello.dummyuafclient.fidoauthenticator.FidoUafAuthenticator;
+
 
 public class RegistrationRequestProcessor {
 	
-	public RegistrationResponse processRequest(RegistrationRequest regRequest, KeyPair keyPair) {
+	public RegistrationResponse processRequest(RegistrationRequest regRequest, KeyPair keyPair, String facetId) {
 		RegistrationResponse response = new RegistrationResponse();
 		RegAssertionBuilder builder = new RegAssertionBuilder(keyPair);
 		Gson gson = new Gson();
 
-
-		setAppId(regRequest, response);
 		response.header = new OperationHeader();
 		response.header.serverData = regRequest.header.serverData;
 		response.header.appID = regRequest.header.appID;
@@ -47,8 +47,8 @@ public class RegistrationRequestProcessor {
 
 		FinalChallengeParams fcParams = new FinalChallengeParams();
 		fcParams.appID = regRequest.header.appID;
-		Preferences.setSettingsParam("appID", fcParams.appID);
-		fcParams.facetID = getFacetId();
+//		Preferences.setSettingsParam("appID", fcParams.appID);
+		fcParams.facetID = facetId;
 		fcParams.challenge = regRequest.challenge;
 		response.fcParams = Base64.encodeToString(gson.toJson(
 				fcParams).getBytes(), Base64.URL_SAFE);
@@ -56,26 +56,16 @@ public class RegistrationRequestProcessor {
 		return response;
 	}
 
-	private String getFacetId() {
-		return "";
-	}
-
 	private void setAssertions(RegistrationResponse response, RegAssertionBuilder builder) {
 		response.assertions = new AuthenticatorRegistrationAssertion[1];
+		FidoUafAuthenticator fidoUafAuthenticator = FidoUafAuthenticator.getInstance();
 		try {
 			response.assertions[0] = new AuthenticatorRegistrationAssertion();
 			response.assertions[0].assertion = builder.getAssertions(response);
-			response.assertions[0].assertionScheme = "UAFV1TLV";
+			response.assertions[0].assertionScheme = fidoUafAuthenticator.getAuthenticatorDetails().assertionScheme;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	}
-
-	private void setAppId(RegistrationRequest regRequest,
-			RegistrationResponse response) {
-		// TODO Auto-generated method stub
 		
 	}
 

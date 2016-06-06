@@ -38,19 +38,23 @@ public class Reg {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private Gson gson = new Gson();
 	
-	public String register (String uafMsg){
+	public String register (String uafMsg, String rpServerEndpoint, String facetId){
 	logger.info ("  [UAF][1]Reg  ");
 	try {
-		KeyPair keyPair = KeyCodec.getKeyPair();
+		// TODO We need to create 1 keypair per RP
+		KeyPair keyPair = KeyCodec.getKeyPair(rpServerEndpoint);
 		logger.info("  [UAF][2]Reg - KeyPair generated"+keyPair);
 		RegistrationRequestProcessor p = new RegistrationRequestProcessor();
 		RegistrationResponse[] ret = new RegistrationResponse[1];
-		RegistrationResponse regResponse = p.processRequest(getRegistrationRequest(uafMsg), keyPair);
+		RegistrationResponse regResponse = p.processRequest(getRegistrationRequest(uafMsg), keyPair, facetId);
 		logger.info ("  [UAF][4]Reg - Reg Response Formed  ");
 		logger.info(regResponse.assertions[0].assertion);
 		logger.info ("  [UAF][6]Reg - done  ");
-		Preferences.setSettingsParam("pub", Base64.encodeToString(keyPair.getPublic().getEncoded(), Base64.URL_SAFE));
-		Preferences.setSettingsParam("priv", Base64.encodeToString(keyPair.getPrivate().getEncoded(), Base64.URL_SAFE));
+		// TODO We need to create 1 keypair per RP
+
+//		Preferences.setSettingsParam("pub", Base64.encodeToString(keyPair.getPublic().getEncoded(), Base64.URL_SAFE));
+//		Preferences.setSettingsParam("priv", Base64.encodeToString(keyPair.getPrivate().getEncoded(), Base64.URL_SAFE));
+
 		logger.info ("  [UAF][7]Reg - keys stored  ");
 		ret[0] = regResponse;
 		return getUafProtocolMsg( gson.toJson(ret) );

@@ -41,17 +41,18 @@ import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.logging.Logger;
 
+import br.edu.ifsc.mello.dummyuafclient.fidoauthenticator.FidoUafAuthenticator;
+
 
 public class RegAssertionBuilder {
 
-	public static final String AAID = "EBA0#0001";
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private KeyPair keyPair = null;
 	private TlvAssertionParser parser = new TlvAssertionParser();
+	private FidoUafAuthenticator fidoUafAuthenticator = FidoUafAuthenticator.getInstance();
 	
 	public RegAssertionBuilder (KeyPair keyPair){
 		this.keyPair  = keyPair;
-		
 	}
 
 	public String getAssertions(RegistrationResponse response) throws Exception {
@@ -165,7 +166,8 @@ public class RegAssertionBuilder {
 	}
 
 	private byte[] getPubKeyId() throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return KeyCodec.getKeyAsRawBytes((BCECPublicKey)this.keyPair.getPublic());
+//		return KeyCodec.getKeyAsRawBytes((BCECPublicKey)this.keyPair.getPublic());
+		return KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)this.keyPair.getPublic());
 	}
 
 	private byte[] getSignature(byte[] dataForSigning) throws Exception {
@@ -187,7 +189,7 @@ public class RegAssertionBuilder {
 				SHA.sha(dataForSigning, "SHA-256"));
 
 		boolean verify = NamedCurve.verify(
-				KeyCodec.getKeyAsRawBytes((ECPublicKey)KeyCodec.getPubKey(Base64.decode(AttestCert.pubCert, Base64.URL_SAFE))),
+				KeyCodec.getKeyAsRawBytes((java.security.interfaces.ECPublicKey)KeyCodec.getPubKey(Base64.decode(AttestCert.pubCert, Base64.URL_SAFE))),
 				//KeyCodec.getKeyAsRawBytes((ECPublicKey)this.keyPair.getPublic()),
 				SHA.sha(dataForSigning, "SHA-256"),
 				Asn1.decodeToBigIntegerArray(Asn1.getEncoded(signatureGen)));
@@ -211,7 +213,7 @@ public class RegAssertionBuilder {
 		return byteout.toByteArray();
 	}
 	
-	
+
 	private byte[] getCounters() throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byteout.write(encodeInt(0));
@@ -223,7 +225,7 @@ public class RegAssertionBuilder {
 
 	private byte[] getAAID() throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
-		byte[] value = AAID.getBytes();
+		byte[] value = fidoUafAuthenticator.getAuthenticatorDetails().aaid.getBytes();
 		byteout.write(value);
 		return byteout.toByteArray();
 	}
