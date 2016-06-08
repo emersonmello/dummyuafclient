@@ -1,9 +1,6 @@
 package br.edu.ifsc.mello.dummyuafclient;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.Application;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
@@ -38,7 +35,7 @@ public class FingerprintUiHelper extends FingerprintManager.AuthenticationCallba
         mCallback = callback;
     }
 
-    public boolean isFingerprintAuthAvailable(FIDOUAFClient activity) {
+    public boolean isFingerprintAuthAvailable(FIDOUAFClientActivity activity) {
         if (ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                     Manifest.permission.USE_FINGERPRINT)) {
@@ -48,14 +45,14 @@ public class FingerprintUiHelper extends FingerprintManager.AuthenticationCallba
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.USE_FINGERPRINT},
-                        FIDOUAFClient.MY_PERMISSIONS_USE_FINGERPRINT);
+                        FIDOUAFClientActivity.MY_PERMISSIONS_USE_FINGERPRINT);
             }
         }
         return mFingerprintManager.isHardwareDetected()
                 && mFingerprintManager.hasEnrolledFingerprints();
     }
 
-    public void startListening(FingerprintManager.CryptoObject cryptoObject, FIDOUAFClient activity) {
+    public void startListening(FingerprintManager.CryptoObject cryptoObject, FIDOUAFClientActivity activity) {
         if (isFingerprintAuthAvailable(activity)) {
             mCancellationSignal = new CancellationSignal();
             mSelfCancelled = false;
