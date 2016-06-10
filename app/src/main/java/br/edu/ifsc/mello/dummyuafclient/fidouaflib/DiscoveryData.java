@@ -30,13 +30,11 @@ public class DiscoveryData {
             try {
                 InitConfig.getInstance()
                         .init(OperationalParams.AAID, OperationalParams.defaultAttestCert, OperationalParams.defaultAttestPrivKey, new OperationalParams(), new Storage());
-                discoveryData.availableAuthenticators[0] = InitConfig.getInstance().getOperationalParams().getAuthenticator();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
-
+        discoveryData.availableAuthenticators[0] = InitConfig.getInstance().getOperationalParams().getAuthenticator();
 
         String discoveryDataJson = (new Gson()).toJson(discoveryData);
         return discoveryDataJson;

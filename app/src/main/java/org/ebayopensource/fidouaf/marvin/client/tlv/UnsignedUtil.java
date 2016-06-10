@@ -19,18 +19,38 @@ package org.ebayopensource.fidouaf.marvin.client.tlv;
 import java.io.IOException;
 
 public class UnsignedUtil {
-	
+
 	public static int read_UAFV1_UINT16(ByteInputStream bytes) throws IOException {
 		int a = bytes.readUnsignedByte();
 		int b = bytes.readUnsignedByte();
 		return a + b * 256;
 	}
-	
+
+	/**
+	 * Take the two bytes of the integer and encode it in little endian
+	 * @param id
+	 * @return
+	 */
 	public static byte[] encodeInt(int id) {
-			
-			byte[] bytes = new byte[2];
-			bytes[0] = (byte)(id&0x00ff);
-			bytes[1] = (byte)((id&0xff00)>>8);
-			return bytes;
+
+		byte[] bytes = new byte[2];
+		bytes[0] = (byte)(id&0x00ff);
+		bytes[1] = (byte)((id&0xff00)>>8);
+		return bytes;
+	}
+
+	/**
+	 * Take the four bytes of the integer and encode it in little endian
+	 * @param id
+	 * @return
+	 */
+	public static byte[] encodeInt32(int id) {
+
+		byte[] bytes = new byte[4];
+		bytes[0] = (byte)(id&0x000000ff);
+		bytes[1] = (byte)((id&0x0000ff00)>>8);
+		bytes[2] = (byte)((id&0x00ff0000)>>16);
+		bytes[3] = (byte)((id&0xff000000)>>24);
+		return bytes;
 	}
 }

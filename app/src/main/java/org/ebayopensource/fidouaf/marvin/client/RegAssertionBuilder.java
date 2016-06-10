@@ -27,17 +27,17 @@ import org.ebayopensource.fidouaf.marvin.client.crypto.SHA;
 import org.ebayopensource.fidouaf.marvin.client.msg.RegistrationResponse;
 import org.ebayopensource.fidouaf.marvin.client.tlv.TagsEnum;
 import org.ebayopensource.util.Base64;
+import static org.ebayopensource.fidouaf.marvin.client.tlv.UnsignedUtil.encodeInt;
 
 
 public class RegAssertionBuilder {
 
-	public static final String AAID = "EBA0#0003";
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private OperationalParamsIntf operationalParams;
-	
+
 	public RegAssertionBuilder (OperationalParamsIntf operationalParams){
 		this.operationalParams = operationalParams;
-		
+
 	}
 
 	public String getAssertions(RegistrationResponse response) throws Exception {
@@ -77,7 +77,7 @@ public class RegAssertionBuilder {
 
 		return byteout.toByteArray();
 	}
-	
+
 	private byte[] getAttestationBasicFull (byte[] signedDataValue) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
@@ -87,7 +87,7 @@ public class RegAssertionBuilder {
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_ATTESTATION_CERT.id));
 		value = operationalParams.getAttestCert();
 		length = value.length;
@@ -100,7 +100,7 @@ public class RegAssertionBuilder {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
-		
+
 		RegRecord regRecord = operationalParams.genAndRecord(response.header.appID);
 
 		byteout.write(encodeInt(TagsEnum.TAG_AAID.id));
@@ -110,13 +110,13 @@ public class RegAssertionBuilder {
 		byteout.write(value);
 
 		byteout.write(encodeInt(TagsEnum.TAG_ASSERTION_INFO.id));
-		//2 bytes - vendor; 1 byte Authentication Mode; 2 bytes Sig Alg; 2 bytes Pub Key Alg 
+		//2 bytes - vendor; 1 byte Authentication Mode; 2 bytes Sig Alg; 2 bytes Pub Key Alg
 		value = new byte[] { 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 };
 
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_FINAL_CHALLENGE.id));
 		value = getFC(response);
 		length = value.length;
@@ -128,13 +128,13 @@ public class RegAssertionBuilder {
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_COUNTERS.id));
 		value = getCounters();
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_PUB_KEY.id));
 		value = regRecord.getPubKey();
 		length = value.length;
@@ -155,8 +155,8 @@ public class RegAssertionBuilder {
 		byteout.write(value);
 		return byteout.toByteArray();
 	}
-	
-	
+
+
 	private byte[] getCounters() throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byteout.write(encodeInt(0));
@@ -173,12 +173,6 @@ public class RegAssertionBuilder {
 		return byteout.toByteArray();
 	}
 
-	private byte[] encodeInt(int id) {
 
-		byte[] bytes = new byte[2];
-		bytes[0] = (byte) (id & 0x00ff);
-		bytes[1] = (byte) ((id & 0xff00) >> 8);
-		return bytes;
-	}
 
 }

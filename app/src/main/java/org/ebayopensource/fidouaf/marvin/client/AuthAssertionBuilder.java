@@ -26,6 +26,7 @@ import org.ebayopensource.fidouaf.marvin.client.crypto.SHA;
 import org.ebayopensource.fidouaf.marvin.client.msg.AuthenticationResponse;
 import org.ebayopensource.fidouaf.marvin.client.tlv.TagsEnum;
 import org.ebayopensource.util.Base64;
+import static org.ebayopensource.fidouaf.marvin.client.tlv.UnsignedUtil.encodeInt;
 
 public class AuthAssertionBuilder {
 
@@ -83,9 +84,9 @@ public class AuthAssertionBuilder {
 		byteout.write(value);
 
 		byteout.write(encodeInt(TagsEnum.TAG_ASSERTION_INFO.id));
-		//2 bytes - vendor; 1 byte Authentication Mode; 2 bytes Sig Alg 
+		//2 bytes - vendor; 1 byte Authentication Mode; 2 bytes Sig Alg
 		value = new byte[]{0x00, 0x00, 0x01, 0x01, 0x00}; //EC RAW
-		
+
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -95,23 +96,23 @@ public class AuthAssertionBuilder {
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_FINAL_CHALLENGE.id));
 		value = getFC(response);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_TRANSACTION_CONTENT_HASH.id));
 		length = 0;
 		byteout.write(encodeInt(length));
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_KEYID.id));
 		value = getKeyId(response.header.appID);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
-		
+
 		byteout.write(encodeInt(TagsEnum.TAG_COUNTERS.id));
 		value = getCounters();
 		length = value.length;
@@ -120,11 +121,11 @@ public class AuthAssertionBuilder {
 
 		return byteout.toByteArray();
 	}
-	
+
 	private byte[] getFC(AuthenticationResponse response) throws NoSuchAlgorithmException {
 		return SHA.sha(response.fcParams.getBytes(), "SHA-256");
 	}
-	
+
 	private byte[] getCounters() throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byteout.write(encodeInt(0));
@@ -146,13 +147,4 @@ public class AuthAssertionBuilder {
 		byteout.write(value);
 		return byteout.toByteArray();
 	}
-
-	private byte[] encodeInt(int id) {
-
-		byte[] bytes = new byte[2];
-		bytes[0] = (byte) (id & 0x00ff);
-		bytes[1] = (byte) ((id & 0xff00) >> 8);
-		return bytes;
-	}
-
 }

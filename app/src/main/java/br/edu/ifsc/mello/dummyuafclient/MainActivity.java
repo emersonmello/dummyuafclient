@@ -6,10 +6,13 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.SharedPreferences;
+
+import org.ebayopensource.fidouaf.marvin.Preferences;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        SharedPreferences preferences = Preferences.getPrefferences();
+        Log.i("Preferences: ", preferences.getAll().toString());
 
     }
 
