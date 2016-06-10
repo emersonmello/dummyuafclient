@@ -44,6 +44,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 
 import br.edu.ifsc.mello.dummyuafclient.fidouaflib.AttachmentHintEnum;
@@ -280,6 +282,19 @@ public class OperationalParams implements OperationalParamsIntf {
             throw new Exception ("SystemError");
         }
         return signature;
+    }
+
+    public boolean removeKey(String appId){
+        String keyId = this.getKeyId(appId);
+        try {
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            ks.deleteEntry(keyId);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void fillAuthenticatorDetails() {

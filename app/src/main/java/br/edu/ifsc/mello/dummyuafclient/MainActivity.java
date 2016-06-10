@@ -35,10 +35,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SharedPreferences preferences = Preferences.getPrefferences();
-        Log.i("Preferences: ", preferences.getAll().toString());
-
     }
+
+
+    public void showAuthListActivity(View view){
+        Intent intent = new Intent(MainActivity.this,AuthenticatorActivity.class);
+        startActivity(intent);
+    }
+
+
 
 
 

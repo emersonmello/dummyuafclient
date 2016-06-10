@@ -4,10 +4,12 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.spec.ECGenParameterSpec;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -180,6 +182,19 @@ public class OperationalParams implements OperationalParamsIntf{
 		obj.genAndRecord("TestAppId");
 		obj.getSignature("signedDataValue".getBytes(), TestKeyId);
 		
+	}
+
+	public boolean removeKey(String appId){
+		String keyId = this.getKeyId(appId);
+		try {
+			KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+			ks.load(null);
+			ks.deleteEntry(keyId);
+			return true;
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	private void fillAuthenticatorDetails() {

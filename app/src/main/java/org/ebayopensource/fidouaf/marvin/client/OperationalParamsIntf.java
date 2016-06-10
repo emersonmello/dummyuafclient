@@ -56,4 +56,7 @@ public interface OperationalParamsIntf {
 	String getKeyId(String appId);
 	void init (String aaid, byte[] attestCert, byte[] attestPrivKey, StorageInterface storage);
 	byte[] getSignature(byte[] signedDataValue, String keyId) throws Exception;
+
+	boolean removeKey(String appId);
+
 }

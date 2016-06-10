@@ -5,6 +5,8 @@ import org.ebayopensource.fidouaf.marvin.client.tlv.AlgAndEncodingEnum;
 import org.ebayopensource.fidouaf.marvin.client.tlv.TagsEnum;
 
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,6 +113,19 @@ public class OperationalParamsDummy implements OperationalParamsIntf{
 	public byte[] getSignature(byte[] signedDataValue, String keyId)
 			throws Exception {
 		return TestSignature;
+	}
+
+	public boolean removeKey(String appId){
+		String keyId = this.getKeyId(appId);
+		try {
+			KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+			ks.load(null);
+			ks.deleteEntry(keyId);
+			return true;
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	private void fillAuthenticatorDetails() {
