@@ -22,6 +22,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
@@ -191,12 +192,24 @@ public class OperationalParams implements OperationalParamsIntf {
     public RegRecord genAndRecord(String appId) {
 
         String keyId = genKeyId();
+        keyId = keyId.substring(0,keyId.length()-2);//removing =\n
+        String previousKeyId = Preferences.getSettingsParam(appIdPrefix+appId);
+        // Removing previous key material for the same appId (today, appId = RP Server)
+        if (!previousKeyId.isEmpty()){
+            try {
+                KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+                ks.load(null);
+                ks.deleteEntry(previousKeyId);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
         Preferences.setSettingsParam(appIdPrefix+appId, keyId);
         RegRecord record = new RegRecord(
                 keyId,
                 getKeyPairGenerator(keyId).generateKeyPair().getPublic().getEncoded()
         );
-        storage.addRecord(record);
+//        storage.addRecord(record);
         return record;
     }
 
@@ -227,16 +240,18 @@ public class OperationalParams implements OperationalParamsIntf {
         String comma = "";
         try {
             Context context = ApplicationContextProvider.getContext();
-            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(Preferences.getSettingsParam("callingPackageName"), PackageManager.GET_SIGNATURES);
-//            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNATURES);
-            for (Signature sign: packageInfo.signatures) {
-                MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
-                messageDigest.update(sign.toByteArray());
-                String currentSignature = Base64.encodeToString(messageDigest.digest(), Base64.DEFAULT);
-                ret.append("android:apk-key-hash:");
-                ret.append(currentSignature.substring(0, currentSignature.length() - 2));
-                ret.append(comma);
-                comma = ",";
+            String callingPackageName = Preferences.getSettingsParam("callingPackageName");
+            if (!callingPackageName.isEmpty()) {
+                PackageInfo packageInfo = context.getPackageManager().getPackageInfo(callingPackageName, PackageManager.GET_SIGNATURES);
+                for (Signature sign : packageInfo.signatures) {
+                    MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+                    messageDigest.update(sign.toByteArray());
+                    String currentSignature = Base64.encodeToString(messageDigest.digest(), Base64.DEFAULT);
+                    ret.append("android:apk-key-hash:");
+                    ret.append(currentSignature.substring(0, currentSignature.length() - 2));
+                    ret.append(comma);
+                    comma = ",";
+                }
             }
             return ret.toString();
         } catch (PackageManager.NameNotFoundException e) {
@@ -249,7 +264,7 @@ public class OperationalParams implements OperationalParamsIntf {
 
     @Override
     public String getKeyId(String appId) {
-        return Preferences.getSettingsParam(appIdPrefix+appId).trim()+"\n";
+        return Preferences.getSettingsParam(appIdPrefix+appId).trim();
     }
 
     @Override
