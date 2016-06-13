@@ -60,16 +60,10 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
     private Intent callingIntent;
     private String appFacetId;
 
-    //TODO 1 key per RP Server (inheritance from eBay original project) - Move it from SharedPreferences to a HW Keystore+DB;
-    private SharedPreferences mSharedPreferences;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fingerprint_dialog_container);
-
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
         mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
@@ -174,7 +168,8 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
 
     public void processUAFIntentType(Intent intent) {
         this.callingIntent = intent;
-        String callingPackageName = getCallingPackage();
+
+        String callingPackageName = getPackageName();
         Preferences.setSettingsParam("callingPackageName", callingPackageName);
 
         Bundle extras = intent.getExtras();
@@ -200,7 +195,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                         uafError(ErrorCode.PROTOCOL_ERROR.getID(), UAFIntentType.UAF_OPERATION_RESULT.name());
                         return;
                     }
-                    //TODO Move from SharedPreferences to AndroidKeystore. Currently a only one RP is allowed
+
                     if (inMsg.contains("\"Dereg\"")) {
                         try {
                             Dereg deregOp = new Dereg();
@@ -217,8 +212,13 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                     } else {
                         OperationalParams operationalParams = new OperationalParams();
                         appFacetId = operationalParams.getFacetId();
-
                         String appId = FidoUafUtils.extractAppId(inMsg);
+
+                        if (appFacetId == null){
+                            Log.i("FIDOUAFClient", "processOp failed.");
+                            uafError(ErrorCode.UNKNOWN.getID(), null);
+                            return;
+                        }
                         if (appId.isEmpty()) {
                             this.executeFIDOOperations(inMsg, appFacetId, false);
                         } else if (appId.contains(appFacetId)) {
@@ -241,8 +241,10 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
     private void executeFIDOOperations(String inMsg, String trustedFacets, boolean getAppId) {
         if (trustedFacets.isEmpty()) {
             uafError(ErrorCode.PROTOCOL_ERROR.getID(), UAFIntentType.UAF_OPERATION_RESULT.name());
+
             return;
         }
+
         Bundle extras = new Bundle();
         extras.putString("UAFIntentType", UAFIntentType.UAF_OPERATION_RESULT.name());
 
