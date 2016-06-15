@@ -9,10 +9,13 @@ import android.provider.Settings;
 import android.security.keystore.KeyInfo;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -51,6 +54,51 @@ public class AuthenticatorActivity extends AppCompatActivity {
         super.onResume();
         this.fillListView();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_authenticator_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_reset:
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.reset_title)
+                        .setIcon(R.drawable.ic_error_outline_black_24dp)
+                        .setMessage(R.string.reset_desc)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences settings = Preferences.getPrefferences();
+                                SharedPreferences.Editor editor = settings.edit();
+                                editor.clear();
+                                editor.apply();
+                                try {
+                                    KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+                                    ks.load(null);
+                                    Enumeration<String> aliases = ks.aliases();
+                                    while (aliases.hasMoreElements()) {
+                                        String alias = aliases.nextElement();
+                                        if (!alias.contains("UAFAttestKey")) {
+                                            ks.deleteEntry(alias);
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                fillListView();
+                            }
+                        })
+                        .setNegativeButton(R.string.no, null).show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     private void showListView(AuthenticatorInfoAdapter arrayAdapter, ListView listView, TextView textView) {
         listView.setVisibility((arrayAdapter.isEmpty()) ? View.GONE : View.VISIBLE);

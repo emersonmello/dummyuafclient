@@ -39,7 +39,7 @@
         </activity>
         <activity
             android:name=".AuthenticatorActivity"
-            android:label="@string/title_activity_authenticator"
+            android:label="@string/activity_authenticator_title"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

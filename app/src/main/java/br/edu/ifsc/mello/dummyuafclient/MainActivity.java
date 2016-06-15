@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -63,35 +62,6 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case R.id.action_settings:
                 return true;
-            case R.id.action_reset:
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.reset_title)
-                        .setIcon(R.drawable.ic_error_outline_black_24dp)
-                        .setMessage(R.string.reset_desc)
-                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SharedPreferences settings = Preferences.getPrefferences();
-                                SharedPreferences.Editor editor = settings.edit();
-                                editor.clear();
-                                editor.apply();
-                                try {
-                                    KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-                                    ks.load(null);
-                                    Enumeration<String> aliases = ks.aliases();
-                                    while (aliases.hasMoreElements()) {
-                                        String alias = aliases.nextElement();
-                                        if (!alias.contains("UAFAttestKey")){
-                                            ks.deleteEntry(alias);
-                                        }
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        })
-                        .setNegativeButton(R.string.no, null).show();
-                break;
         }
         return super.onOptionsItemSelected(item);
     }

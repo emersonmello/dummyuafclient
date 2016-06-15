@@ -27,7 +27,7 @@
     <string name="appid_label">AppID:</string>
     <string name="pubkey_label">PubKey:</string>
     <string name="auth_keyid_label">KeyId:</string>
-    <string name="title_activity_authenticator">Authenticator List</string>
+    <string name="activity_authenticator_title">Authenticator List</string>
     <string name="private_key_is_sec_hw">Private Key is inside secure hardware</string>
     <string name="private_key_isnot_sec_hw">Private Key is not inside secure hardware</string>
     <string name="empty">There is no authenticator registered</string>
