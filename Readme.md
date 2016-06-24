@@ -22,11 +22,9 @@ It is a dummy FIDO UAF Client suitable to conduct development tests on Android s
 
 ### Enhancement requests
 
-- Move from [SharedPreferences](https://developer.android.com/guide/topics/data/data-storage.html#pref) (code inherited from eBay) to [Hardware-backed Keystore](https://source.android.com/security/keystore/index.html) to store a key pair for each Relaying Party
 - Create a Settings activity that allows change details about fake Authenticator, generate new attestation keys, etc.
-- Create a UI to list Relaying Parties details (i.e. Name, URL, associated key material, username account)
+
 
 ### Known issues
 
-- According to [FIDO Protocol](https://fidoalliance.org/specs/fido-uaf-v1.0-ps-20141208/fido-uaf-protocol-v1.0-ps-20141208.html#dictionary-finalchallengeparams-members), `channelBinding` contains TLS information to be sent by the FIDO client to the FIDO Server, however Dummy UAF Client is not doing that.
-- `saveAAIDandKeyID` method is not working properly
+- Static attestation certificate is not valid (it is expired) and attestation private key is not stored securely, so authentication operation could result in "SIGNATURE IS NOT VALID".  
