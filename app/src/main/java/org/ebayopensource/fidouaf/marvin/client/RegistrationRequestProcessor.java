@@ -29,35 +29,35 @@ import org.ebayopensource.fidouaf.marvin.client.msg.RegistrationResponse;
 
 public class RegistrationRequestProcessor {
 
-	public RegistrationResponse processRequest(RegistrationRequest regRequest,
-			OperationalParamsIntf operationalParams) throws Exception {
+    public RegistrationResponse processRequest(RegistrationRequest regRequest,
+                                               OperationalParamsIntf operationalParams, String appFacetId) throws Exception {
 
-		RegistrationResponse response = new RegistrationResponse();
-		RegAssertionBuilder builder = new RegAssertionBuilder(operationalParams);
-		Gson gson = new GsonBuilder().create();
-		
-		response.header = new OperationHeader();
-		response.header.serverData = regRequest.header.serverData;
-		response.header.appID = regRequest.header.appID;
-		response.header.op = regRequest.header.op;
-		response.header.upv = regRequest.header.upv;
+        RegistrationResponse response = new RegistrationResponse();
+        RegAssertionBuilder builder = new RegAssertionBuilder(operationalParams);
+        Gson gson = new GsonBuilder().create();
 
-		FinalChallengeParams fcParams = new FinalChallengeParams();
-		fcParams.appID = regRequest.header.appID;
-		fcParams.facetID = operationalParams.getFacetId(fcParams.appID);
-		fcParams.challenge = regRequest.challenge;
-		response.fcParams = Base64.encodeToString(gson.toJson(fcParams)
-				.getBytes(), Base64.URL_SAFE);
-		setAssertions(response, builder);
-		return response;
-	}
+        response.header = new OperationHeader();
+        response.header.serverData = regRequest.header.serverData;
+        response.header.appID = regRequest.header.appID;
+        response.header.op = regRequest.header.op;
+        response.header.upv = regRequest.header.upv;
 
-	private void setAssertions(RegistrationResponse response,
-			RegAssertionBuilder builder) throws Exception {
-		response.assertions = new AuthenticatorRegistrationAssertion[1];
-			response.assertions[0] = new AuthenticatorRegistrationAssertion();
-			response.assertions[0].assertion = builder.getAssertions(response);
-			response.assertions[0].assertionScheme = "UAFV1TLV";
-	}
+        FinalChallengeParams fcParams = new FinalChallengeParams();
+        fcParams.appID = regRequest.header.appID;
+        fcParams.facetID = operationalParams.getFacetId(fcParams.appID);
+        fcParams.challenge = regRequest.challenge;
+        response.fcParams = Base64.encodeToString(gson.toJson(fcParams)
+                .getBytes(), Base64.URL_SAFE);
+        setAssertions(response, builder, appFacetId);
+        return response;
+    }
+
+    private void setAssertions(RegistrationResponse response,
+                               RegAssertionBuilder builder, String appFacetId) throws Exception {
+        response.assertions = new AuthenticatorRegistrationAssertion[1];
+        response.assertions[0] = new AuthenticatorRegistrationAssertion();
+        response.assertions[0].assertion = builder.getAssertions(response, appFacetId);
+        response.assertions[0].assertionScheme = "UAFV1TLV";
+    }
 
 }

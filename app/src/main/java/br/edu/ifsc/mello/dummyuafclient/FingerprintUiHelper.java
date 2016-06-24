@@ -39,7 +39,7 @@ public class FingerprintUiHelper extends FingerprintManager.AuthenticationCallba
         if (ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                     Manifest.permission.USE_FINGERPRINT)) {
-                Toast.makeText(activity, "I'm sorry, we really need fingerprint permission or this app will not work properly.",
+                Toast.makeText(activity, R.string.fingerprint_permission,
                         Toast.LENGTH_LONG).show();
             } else {
                 // No explanation needed, we can request the permission.

@@ -27,54 +27,54 @@ import com.google.gson.Gson;
 
 public class Reg {
 
-	private Logger logger = Logger.getLogger(this.getClass().getName());
-	private Gson gson = new Gson();
+    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private Gson gson = new Gson();
 
-	public String register(String uafMsg) throws UafMsgProcessException, UafRequestMsgParseException, UafResponseMsgParseException {
-		logger.info("  [UAF][1]Reg  ");
+    public String register(String uafMsg, String appFacetId) throws UafMsgProcessException, UafRequestMsgParseException, UafResponseMsgParseException {
+        logger.info("  [UAF][1]Reg  ");
 
-		RegistrationResponse[] ret = new RegistrationResponse[1];
-		RegistrationResponse regResponse = process(getRegistrationRequest(uafMsg));
-		logger.info(regResponse.assertions[0].assertion);
-		ret[0] = regResponse;
-		return getUafProtocolMsg(ret);
-	}
+        RegistrationResponse[] ret = new RegistrationResponse[1];
+        RegistrationResponse regResponse = process(getRegistrationRequest(uafMsg), appFacetId);
+        logger.info(regResponse.assertions[0].assertion);
+        ret[0] = regResponse;
+        return getUafProtocolMsg(ret);
+    }
 
-	public RegistrationResponse process(RegistrationRequest regRequest)
-			throws UafMsgProcessException {
-		try {
-			RegistrationRequestProcessor p = new RegistrationRequestProcessor();
-			return p.processRequest(regRequest, InitConfig.getInstance()
-					.getOperationalParams());
-		} catch (Exception e) {
-			throw new UafMsgProcessException(e);
-		}
-	}
+    public RegistrationResponse process(RegistrationRequest regRequest, String appFacetId)
+            throws UafMsgProcessException {
+        try {
+            RegistrationRequestProcessor p = new RegistrationRequestProcessor();
+            return p.processRequest(regRequest, InitConfig.getInstance()
+                    .getOperationalParams(), appFacetId);
+        } catch (Exception e) {
+            throw new UafMsgProcessException(e);
+        }
+    }
 
-	public RegistrationRequest getRegistrationRequest(String uafMsg) throws UafRequestMsgParseException {
-		try {
-			logger.info("  [UAF][3]Reg - getRegRequest  : " + uafMsg);
-			return gson.fromJson(uafMsg, RegistrationRequest[].class)[0];
-		} catch (Exception e) {
-			throw new UafRequestMsgParseException(e);
-		}
-	}
+    public RegistrationRequest getRegistrationRequest(String uafMsg) throws UafRequestMsgParseException {
+        try {
+            logger.info("  [UAF][3]Reg - getRegRequest  : " + uafMsg);
+            return gson.fromJson(uafMsg, RegistrationRequest[].class)[0];
+        } catch (Exception e) {
+            throw new UafRequestMsgParseException(e);
+        }
+    }
 
-	public String getUafProtocolMsg(RegistrationResponse[] ret)
-			throws UafResponseMsgParseException {
-		try {
-			return getUafProtocolMsg(gson.toJson(ret));
-		} catch (Exception e) {
-			throw new UafResponseMsgParseException(e);
-		}
-	}
-	
-	public String getUafProtocolMsg (String uafMsg){
-		String msg = "{\"uafProtocolMessage\":";
-		msg = msg + "\"";
-		msg = msg + uafMsg.replace("\"","\\\"");
-		msg = msg + "\"";
-		msg = msg + "}";
-		return msg;
-	}
+    public String getUafProtocolMsg(RegistrationResponse[] ret)
+            throws UafResponseMsgParseException {
+        try {
+            return getUafProtocolMsg(gson.toJson(ret));
+        } catch (Exception e) {
+            throw new UafResponseMsgParseException(e);
+        }
+    }
+
+    public String getUafProtocolMsg(String uafMsg) {
+        String msg = "{\"uafProtocolMessage\":";
+        msg = msg + "\"";
+        msg = msg + uafMsg.replace("\"", "\\\"");
+        msg = msg + "\"";
+        msg = msg + "}";
+        return msg;
+    }
 }

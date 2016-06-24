@@ -30,19 +30,19 @@ public class Auth {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private Gson gson = new GsonBuilder().disableHtmlEscaping().create(); 
 	
-	public String auth (String uafMsg) throws UafMsgProcessException, UafResponseMsgParseException, UafRequestMsgParseException{
+	public String auth (String uafMsg, String appFacetId) throws UafMsgProcessException, UafResponseMsgParseException, UafRequestMsgParseException{
 		logger.info ("  [UAF][1]Auth  ");
 		AuthenticationRequestProcessor p = new AuthenticationRequestProcessor();
 		AuthenticationResponse[] ret = new AuthenticationResponse[1];
-		ret[0] = process(getAuthRequest(uafMsg), p);
+		ret[0] = process(getAuthRequest(uafMsg), p, appFacetId);
 		return getUafProtocolMsg( ret );
 	}
 
 	private AuthenticationResponse process(AuthenticationRequest uafMsg,
-			AuthenticationRequestProcessor p)
+			AuthenticationRequestProcessor p, String appFacetId)
 			throws UafMsgProcessException {
 		try{
-			AuthenticationResponse regResponse = p.processRequest(uafMsg, InitConfig.getInstance().getOperationalParams());
+			AuthenticationResponse regResponse = p.processRequest(uafMsg, InitConfig.getInstance().getOperationalParams(), appFacetId);
 			checkResult(regResponse);
 			logger.info ("  [UAF][3]Auth - Auth Response Formed  ");
 			logger.info(regResponse.assertions[0].assertion);

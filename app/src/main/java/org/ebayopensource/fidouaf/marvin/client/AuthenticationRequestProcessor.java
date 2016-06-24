@@ -29,7 +29,7 @@ import org.ebayopensource.fidouaf.marvin.client.msg.OperationHeader;
 
 public class AuthenticationRequestProcessor {
 	
-	public AuthenticationResponse processRequest(AuthenticationRequest request, OperationalParamsIntf operationalParams) throws Exception{
+	public AuthenticationResponse processRequest(AuthenticationRequest request, OperationalParamsIntf operationalParams, String appFacetId) throws Exception{
 		AuthenticationResponse response = new AuthenticationResponse();
 		AuthAssertionBuilder builder = new AuthAssertionBuilder();
 		Gson gson = new GsonBuilder().create();
@@ -47,14 +47,14 @@ public class AuthenticationRequestProcessor {
 		fcParams.challenge = request.challenge;
 		response.fcParams = Base64.encodeToString(gson.toJson(
 				fcParams).getBytes(), Base64.URL_SAFE);
-		setAssertions(response,builder, operationalParams);
+		setAssertions(response,builder, operationalParams, appFacetId);
 		return response;
 	}
 
-	private void setAssertions(AuthenticationResponse response, AuthAssertionBuilder builder, OperationalParamsIntf operationalParams) throws Exception{
+	private void setAssertions(AuthenticationResponse response, AuthAssertionBuilder builder, OperationalParamsIntf operationalParams, String appFacetId) throws Exception{
 		response.assertions = new AuthenticatorSignAssertion[1];
 		response.assertions[0] = new AuthenticatorSignAssertion();
-		response.assertions[0].assertion = builder.getAssertions(response, operationalParams);
+		response.assertions[0].assertion = builder.getAssertions(response, operationalParams, appFacetId);
 		response.assertions[0].assertionScheme = "UAFV1TLV";
 	}
 

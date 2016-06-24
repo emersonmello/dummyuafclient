@@ -2,14 +2,9 @@ package br.edu.ifsc.mello.dummyuafclient;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.security.keystore.KeyInfo;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
@@ -18,16 +13,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.ebayopensource.fidouaf.marvin.ApplicationContextProvider;
 import org.ebayopensource.fidouaf.marvin.OperationalParams;
 import org.ebayopensource.fidouaf.marvin.Preferences;
-import org.ebayopensource.fidouaf.marvin.Storage;
-import org.ebayopensource.fidouaf.marvin.client.StorageInterface;
 
 import java.security.KeyFactory;
 import java.security.KeyStore;

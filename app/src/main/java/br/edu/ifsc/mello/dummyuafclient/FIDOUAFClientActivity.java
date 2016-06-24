@@ -9,14 +9,12 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -195,11 +193,13 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                         uafError(ErrorCode.PROTOCOL_ERROR.getID(), UAFIntentType.UAF_OPERATION_RESULT.name());
                         return;
                     }
-
-                    if (inMsg.contains("\"Dereg\"")) {
+                    OperationalParams operationalParams = new OperationalParams();
+                    appFacetId = operationalParams.getFacetId();
+                    if (inMsg.contains("Dereg")) {
                         try {
                             Dereg deregOp = new Dereg();
-                            String response = deregOp.dereg(inMsg);
+                            String response = deregOp.dereg(inMsg, appFacetId);
+                            extras.putString("UAFIntentType", UAFIntentType.UAF_OPERATION_RESULT.name());
                             extras.putShort("errorCode", ErrorCode.NO_ERROR.getID());
                             extras.putString("message", response);
                             callingIntent.putExtras(extras);
@@ -210,11 +210,8 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                             uafError(ErrorCode.UNKNOWN.getID(), null);
                         }
                     } else {
-                        OperationalParams operationalParams = new OperationalParams();
-                        appFacetId = operationalParams.getFacetId();
                         String appId = FidoUafUtils.extractAppId(inMsg);
-
-                        if (appFacetId == null){
+                        if (appFacetId == null) {
                             Log.i("FIDOUAFClient", "processOp failed.");
                             uafError(ErrorCode.UNKNOWN.getID(), null);
                             return;
@@ -262,10 +259,10 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
         try {
             if (inMsg.contains("\"Reg\"")) {
                 Reg regOp = new Reg();
-                response = regOp.register(inMsg);
+                response = regOp.register(inMsg, appFacetId);
             } else if (inMsg.contains("\"Auth\"")) {
                 Auth authOp = new Auth();
-                response = authOp.auth(inMsg);
+                response = authOp.auth(inMsg, appFacetId);
             }
             extras.putShort("errorCode", NO_ERROR.getID());
             extras.putString("message", response);

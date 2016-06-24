@@ -33,14 +33,14 @@ public class AuthAssertionBuilder {
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private OperationalParamsIntf operationalParams;
 
-	public String getAssertions(AuthenticationResponse response, OperationalParamsIntf operationalParams) throws Exception {
+	public String getAssertions(AuthenticationResponse response, OperationalParamsIntf operationalParams, String appFacetId) throws Exception {
 		this.operationalParams = operationalParams;
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
 
 		byteout.write(encodeInt(TagsEnum.TAG_UAFV1_AUTH_ASSERTION.id));
-		value = getAuthAssertion(response);
+		value = getAuthAssertion(response, appFacetId);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -50,13 +50,13 @@ public class AuthAssertionBuilder {
 		return ret;
 	}
 
-	private byte[] getAuthAssertion(AuthenticationResponse response) throws Exception {
+	private byte[] getAuthAssertion(AuthenticationResponse response, String appFacetId) throws Exception {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
 
 		byteout.write(encodeInt(TagsEnum.TAG_UAFV1_SIGNED_DATA.id));
-		value = getSignedData(response);
+		value = getSignedData(response, appFacetId);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -64,7 +64,8 @@ public class AuthAssertionBuilder {
 		byte[] signedDataValue = byteout.toByteArray();
 
 		byteout.write(encodeInt(TagsEnum.TAG_SIGNATURE.id));
-		value = operationalParams.getSignature(signedDataValue, operationalParams.getKeyId(response.header.appID));
+//		value = operationalParams.getSignature(signedDataValue, operationalParams.getKeyId(response.header.appID));
+		value = operationalParams.getSignature(signedDataValue, operationalParams.getKeyId(appFacetId));
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -72,7 +73,7 @@ public class AuthAssertionBuilder {
 		return byteout.toByteArray();
 	}
 
-	private byte[] getSignedData(AuthenticationResponse response) throws IOException, NoSuchAlgorithmException {
+	private byte[] getSignedData(AuthenticationResponse response, String appFacetId) throws IOException, NoSuchAlgorithmException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		byte[] value = null;
 		int length = 0;
@@ -108,7 +109,8 @@ public class AuthAssertionBuilder {
 		byteout.write(encodeInt(length));
 
 		byteout.write(encodeInt(TagsEnum.TAG_KEYID.id));
-		value = getKeyId(response.header.appID);
+		//value = getKeyId(response.header.appID);
+		value = getKeyId(appFacetId);
 		length = value.length;
 		byteout.write(encodeInt(length));
 		byteout.write(value);
@@ -135,7 +137,8 @@ public class AuthAssertionBuilder {
 
 	private byte[] getKeyId(String appId) throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
-		String keyId = Base64.encodeToString(operationalParams.getKeyId(appId).getBytes(), Base64.URL_SAFE);
+		String temp = operationalParams.getKeyId(appId);
+		String keyId = Base64.encodeToString(temp.getBytes(), Base64.URL_SAFE);
 		byte[] value = keyId.getBytes();
 		byteout.write(value);
 		return byteout.toByteArray();
