@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.ebayopensource.fidouaf.marvin.ApplicationContextProvider;
 import org.ebayopensource.fidouaf.marvin.client.msg.Version;
 import org.ebayopensource.fidouaf.marvin.client.msg.client.UAFIntentType;
 import org.ebayopensource.fidouaf.marvin.client.op.Auth;

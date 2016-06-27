@@ -35,4 +35,8 @@
     <string name="reset_title">Reset FIDO UAF Client</string>
     <string name="reset_desc">Would you like to remove all entries on SharedPreferences and on KeyStore?</string>
     <string name="pubkey_title">Public Key</string>
+    <string name="action_details">Details</string>
+    <string name="reset_attest_title">Create a new Attestation Key</string>
+    <string name="reset_attest_desc">Would you like to generate a new attestation key? It will invalidate authenticator keys issued previously. So it will remove all entries on SharedPreferences and on KeyStore.</string>
+    <string name="activity_attestation_title">Attestation Certificate Details</string>
 </resources>

@@ -24,7 +24,7 @@ public class RegistrationRequestProcessorTest {
 		assertNotNull(req);
 		logger.info(gson.toJson(req));
 		
-		RegistrationResponse resp= r.processRequest(req, operParams);
+		RegistrationResponse resp= r.processRequest(req, operParams,"");
 		assertNotNull(resp);
 		logger.info(gson.toJson(resp));
 	}

@@ -46,6 +46,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="br.edu.ifsc.mello.dummyuafclient.MainActivity" />
         </activity>
+        <activity
+            android:name=".AttestationDetailsActivity"
+            android:label="@string/activity_attestation_title"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="br.edu.ifsc.mello.dummyuafclient.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

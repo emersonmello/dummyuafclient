@@ -61,7 +61,7 @@ import br.edu.ifsc.mello.dummyuafclient.fidouaflib.UserVerifyEnum;
  */
 public class OperationalParams implements OperationalParamsIntf {
     public static String AAID = "EBA0#0001";
-    public static byte[] defaultAttestCert = android.util.Base64.decode ("MIIB9zCCAZ+gAwIBAgIEV0ao6DAJBgcqhkjOPQQBMIGEMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ0ExETAPBgNVBAcMCFNhbiBKb3NlMRMwEQYDVQQKDAplQmF5LCBJbmMuMQwwCgYDVQQLDANUTlMxEjAQBgNVBAMMCWVCYXksIEluYzEeMBwGCSqGSIb3DQEJARYPbnBlc2ljQGViYXkuY29tMB4XDTE2MDUyNjA3NDIzM1oXDTE2MDYwNTA3NDIzM1owgYQxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTERMA8GA1UEBwwIU2FuIEpvc2UxEzARBgNVBAoMCmVCYXksIEluYy4xDDAKBgNVBAsMA1ROUzESMBAGA1UEAwwJZUJheSwgSW5jMR4wHAYJKoZIhvcNAQkBFg9ucGVzaWNAZWJheS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAARt45XjwaE0nV8B8qqhQGlXG9A/HoyBYUvF2WUAPGdH/Jc+B/yFCyEOV+HwbOVh6LpgMOwHCAhe68oEkva7Mm22MAkGByqGSM49BAEDRwAwRAIgbsqkzOb9dA2t3Y2NNLiWzmIeCHRm/e5H+KJsT1D8z+MCIAjBSjxq5kRAo/WQuN0+FObzXlParCwxJd2xWP1l3rxM", android.util.Base64.DEFAULT);
+    public static byte[] defaultAttestCert = android.util.Base64.decode("MIIB9zCCAZ+gAwIBAgIEV0ao6DAJBgcqhkjOPQQBMIGEMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ0ExETAPBgNVBAcMCFNhbiBKb3NlMRMwEQYDVQQKDAplQmF5LCBJbmMuMQwwCgYDVQQLDANUTlMxEjAQBgNVBAMMCWVCYXksIEluYzEeMBwGCSqGSIb3DQEJARYPbnBlc2ljQGViYXkuY29tMB4XDTE2MDUyNjA3NDIzM1oXDTE2MDYwNTA3NDIzM1owgYQxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTERMA8GA1UEBwwIU2FuIEpvc2UxEzARBgNVBAoMCmVCYXksIEluYy4xDDAKBgNVBAsMA1ROUzESMBAGA1UEAwwJZUJheSwgSW5jMR4wHAYJKoZIhvcNAQkBFg9ucGVzaWNAZWJheS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAARt45XjwaE0nV8B8qqhQGlXG9A/HoyBYUvF2WUAPGdH/Jc+B/yFCyEOV+HwbOVh6LpgMOwHCAhe68oEkva7Mm22MAkGByqGSM49BAEDRwAwRAIgbsqkzOb9dA2t3Y2NNLiWzmIeCHRm/e5H+KJsT1D8z+MCIAjBSjxq5kRAo/WQuN0+FObzXlParCwxJd2xWP1l3rxM", android.util.Base64.DEFAULT);
     public static byte[] defaultAttestPrivKey = android.util.Base64.decode("MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgy51Vu4OJrB9lceKjxyEtxqQkp4RfbN0WwfUlNdRMSjegCgYIKoZIzj0DAQehRANCAARt45XjwaE0nV8B8qqhQGlXG9A_HoyBYUvF2WUAPGdH_Jc-B_yFCyEOV-HwbOVh6LpgMOwHCAhe68oEkva7Mm22", android.util.Base64.URL_SAFE);
     public static byte[] defaultAttestPubKey = android.util.Base64.decode("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEbeOV48GhNJ1fAfKqoUBpVxvQPx6MgWFLxdllADxnR_yXPgf8hQshDlfh8GzlYei6YDDsBwgIXuvKBJL2uzJttg", android.util.Base64.URL_SAFE);
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -73,7 +73,7 @@ public class OperationalParams implements OperationalParamsIntf {
     private Authenticator authenticator;
 
     @Override
-    public Authenticator getAuthenticator(){
+    public Authenticator getAuthenticator() {
         return this.authenticator;
     }
 
@@ -119,19 +119,22 @@ public class OperationalParams implements OperationalParamsIntf {
         KeyFactory kf = KeyFactory.getInstance("EC");
         byte[] signature = null;
         try {
-            PrivateKey privateKey =
-                    kf.generatePrivate(new PKCS8EncodedKeySpec(attestPrivKey));
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            PrivateKey privateKey = (PrivateKey) ks.getKey(ApplicationContextProvider.ATTEST_KEY, null);
+//            PrivateKey privateKey =
+//                    kf.generatePrivate(new PKCS8EncodedKeySpec(attestPrivKey));
             java.security.Signature s = java.security.Signature.getInstance("SHA256withECDSA");
             s.initSign(privateKey);
             s.update(SHA.sha(signedDataValue, "SHA-256"));
             signature = s.sign();
-        }catch(KeyPermanentlyInvalidatedException invalidatedKeyException) {
-            logger.info("invalidatedKeyException="+invalidatedKeyException);
+        } catch (KeyPermanentlyInvalidatedException invalidatedKeyException) {
+            logger.info("invalidatedKeyException=" + invalidatedKeyException);
             //Can happen when user removes the screen lock
-            throw new Exception ("KeyInvalidatedByAndroidKeyStore");
-        }catch(Exception e){
-            logger.info("e="+e);
-            throw new Exception ("SystemError");
+            throw new Exception("KeyInvalidatedByAndroidKeyStore");
+        } catch (Exception e) {
+            logger.info("e=" + e);
+            throw new Exception("SystemError");
         }
         return signature;
     }
@@ -182,8 +185,8 @@ public class OperationalParams implements OperationalParamsIntf {
                             .setUserAuthenticationValidityDurationSeconds(5 * 60)
                             .build());
             return keyPairGenerator;
-        }catch (Exception e){
-            logger.info("getKeyPairGenerator: e="+e);
+        } catch (Exception e) {
+            logger.info("getKeyPairGenerator: e=" + e);
             return null;
         }
     }
@@ -192,19 +195,19 @@ public class OperationalParams implements OperationalParamsIntf {
     public RegRecord genAndRecord(String appId) {
 
         String keyId = genKeyId();
-        keyId = keyId.substring(0,keyId.length()-2);//removing =\n
-        String previousKeyId = Preferences.getSettingsParam(appIdPrefix+appId);
+        keyId = keyId.substring(0, keyId.length() - 2);//removing =\n
+        String previousKeyId = Preferences.getSettingsParam(appIdPrefix + appId);
         // Removing previous key material for the same appId (today, appId = RP Server)
-        if (!previousKeyId.isEmpty()){
+        if (!previousKeyId.isEmpty()) {
             try {
                 KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
                 ks.load(null);
                 ks.deleteEntry(previousKeyId);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        Preferences.setSettingsParam(appIdPrefix+appId, keyId);
+        Preferences.setSettingsParam(appIdPrefix + appId, keyId);
         RegRecord record = new RegRecord(
                 keyId,
                 getKeyPairGenerator(keyId).generateKeyPair().getPublic().getEncoded()
@@ -235,7 +238,7 @@ public class OperationalParams implements OperationalParamsIntf {
         return getFacetId();
     }
 
-    public String getFacetId (){
+    public String getFacetId() {
         StringBuffer ret = new StringBuffer();
         String comma = "";
         try {
@@ -264,7 +267,7 @@ public class OperationalParams implements OperationalParamsIntf {
 
     @Override
     public String getKeyId(String appId) {
-        return Preferences.getSettingsParam(appIdPrefix+appId).trim();
+        return Preferences.getSettingsParam(appIdPrefix + appId).trim();
     }
 
     @Override
@@ -290,23 +293,23 @@ public class OperationalParams implements OperationalParamsIntf {
             s.initSign(privateKey);
             s.update(SHA.sha(signedDataValue, "SHA-256"));
             signature = s.sign();
-        }catch(KeyPermanentlyInvalidatedException invalidatedKeyException) {
+        } catch (KeyPermanentlyInvalidatedException invalidatedKeyException) {
             //Can happen when user removes the screen lock
-            throw new Exception ("KeyInvalidatedByAndroidKeyStore");
-        }catch(Exception e){
-            throw new Exception ("SystemError");
+            throw new Exception("KeyInvalidatedByAndroidKeyStore");
+        } catch (Exception e) {
+            throw new Exception("SystemError");
         }
         return signature;
     }
 
-    public boolean removeKey(String appId){
+    public boolean removeKey(String appId) {
         String keyId = this.getKeyId(appId);
         try {
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             ks.deleteEntry(keyId);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;

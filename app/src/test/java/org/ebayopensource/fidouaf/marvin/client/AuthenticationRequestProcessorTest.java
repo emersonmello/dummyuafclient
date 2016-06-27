@@ -27,7 +27,7 @@ public class AuthenticationRequestProcessorTest {
 		AuthenticationRequestProcessor p = new AuthenticationRequestProcessor();
 		AuthenticationRequest req = getTestRequest();
 
-		AuthenticationResponse resp = p.processRequest(req, operParams);
+		AuthenticationResponse resp = p.processRequest(req, operParams, "");
 		assertNotNull(resp);
 		logger.info(gson.toJson(resp));
 	}
@@ -37,7 +37,7 @@ public class AuthenticationRequestProcessorTest {
 		AuthenticationRequestProcessor p = new AuthenticationRequestProcessor();
 		AuthenticationRequest req = getTestRequestWithEmptyApp();
 
-		AuthenticationResponse resp = p.processRequest(req, operParams);
+		AuthenticationResponse resp = p.processRequest(req, operParams, "");
 		assertNotNull(resp);
 		logger.info(gson.toJson(resp));
 	}

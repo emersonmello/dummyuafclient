@@ -22,7 +22,7 @@ public class AuthTest {
 	public void emptyRequest() {
 		InitConfig.getInstance().init(operParams.TEST_AAID, operParams.TestAttestCert, null, operParams, null);
 		try {
-			auth.auth("");
+			auth.auth("","");
 		} catch (UafMsgProcessException e) {
 			fail ("Should have been UafRequestMsgParseException");
 		} catch (UafResponseMsgParseException e) {
@@ -35,7 +35,7 @@ public class AuthTest {
 	@Test
 	public void validRequest() throws Exception {
 		InitConfig.getInstance().init(operParams.TEST_AAID, operParams.TestAttestCert, null, operParams, null);
-		String response = auth.auth(uafMsg);
+		String response = auth.auth(uafMsg,"");
 		assertNotNull(response);
 	}
 
