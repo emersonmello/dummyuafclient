@@ -37,7 +37,7 @@ android:
         - sys-img-armeabi-v7a-addon-google_apis-google-$EMULATOR_API_LEVEL
 
 before_install:
-  - echo no | android create avd --force -n test -t "Android APIs:"$EMULATOR_API_LEVEL --abi $ANDROID_ABI
+  - echo no | android create avd --force -n test -t "Google Inc.:Google APIs:"$EMULATOR_API_LEVEL --abi $ANDROID_ABI
   - emulator -avd test -no-skin -no-audio -no-window &
 
 before_script:
