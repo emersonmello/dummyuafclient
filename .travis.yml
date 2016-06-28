@@ -36,13 +36,11 @@ android:
         - sys-img-armeabi-v7a-addon-google_apis-google-$ANDROID_API_LEVEL
         - sys-img-armeabi-v7a-addon-google_apis-google-$EMULATOR_API_LEVEL
 
-before_install:
+before_script:
+  # Create and start emulator
   - echo no | android create avd --force -n test -t "Google Inc.:Google APIs:"$EMULATOR_API_LEVEL --abi $ANDROID_ABI
   - emulator -avd test -no-skin -no-audio -no-window &
-
-before_script:
   - android-wait-for-emulator
-  - adb shell input keyevent 82 &
 
 script:
   - ./gradlew connectedCheck -x library:signArchives -PdisablePreDex
