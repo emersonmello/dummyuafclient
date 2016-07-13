@@ -94,8 +94,6 @@ public class ApplicationContextProvider extends Application {
                 gen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
                 Hashtable<ASN1ObjectIdentifier, String> attrs = new Hashtable<ASN1ObjectIdentifier, String>();
                 Vector<ASN1ObjectIdentifier> vOrder = new Vector<ASN1ObjectIdentifier>();
-//                attrs.put(X509Principal.E, "dummy@dummyfidoclient.com");
-//                vOrder.add(0, X509Principal.E);
                 attrs.put(X509Principal.CN, "Dummy FIDO Client Inc.");
                 vOrder.add(0, X509Principal.CN);
                 attrs.put(X509Principal.O, "Dummy");
