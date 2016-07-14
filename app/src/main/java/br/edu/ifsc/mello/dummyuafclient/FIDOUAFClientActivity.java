@@ -151,7 +151,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
             setResult(Activity.RESULT_CANCELED, callingIntent);
         }
         mGetTrustedTask = null;
-        finish();
+        finishAndRemoveTask();
     }
 
     @Override
@@ -182,7 +182,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                     extras.putString("discoveryData", DiscoveryData.getFakeDiscoveryData());
                     intent.putExtras(extras);
                     setResult(Activity.RESULT_OK, intent);
-                    finish();
+                    finishAndRemoveTask();
                 }
                 if (data.equals(UAFIntentType.UAF_OPERATION.name())) {
                     String message = (String) extras.get("message");
@@ -205,7 +205,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                             extras.putString("message", response);
                             callingIntent.putExtras(extras);
                             setResult(Activity.RESULT_OK, callingIntent);
-                            finish();
+                            finishAndRemoveTask();
                         } catch (Exception e) {
                             Log.i("FIDOUAFClient", "processOp failed. e=" + e);
                             uafError(ErrorCode.UNKNOWN.getID(), null);
@@ -231,7 +231,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                 }
             }
         } else {
-            finish();
+            finishAndRemoveTask();
         }
     }
 
@@ -253,7 +253,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                 extras.putString("message", response);
                 callingIntent.putExtras(extras);
                 setResult(Activity.RESULT_CANCELED, callingIntent);
-                finish();
+                finishAndRemoveTask();
             }
         }
 
@@ -269,7 +269,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
             extras.putString("message", response);
             callingIntent.putExtras(extras);
             setResult(Activity.RESULT_OK, callingIntent);
-            finish();
+            finishAndRemoveTask();
         } catch (Exception e) {
             Log.i("FIDOUAFClient", "processOp failed. e=" + e);
             uafError(ErrorCode.UNKNOWN.getID(), null);

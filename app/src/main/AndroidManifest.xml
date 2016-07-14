@@ -26,6 +26,7 @@
         <activity
             android:name=".FIDOUAFClientActivity"
             android:label="Dummy FIDO UAF Client"
+            android:clearTaskOnLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="locked"
             android:theme="@style/Theme.AppCompat.Light.Dialog">
