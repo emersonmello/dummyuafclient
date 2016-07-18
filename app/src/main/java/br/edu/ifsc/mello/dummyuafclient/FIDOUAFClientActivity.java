@@ -34,6 +34,9 @@ import org.ebayopensource.fidouaf.marvin.Preferences;
 import org.ebayopensource.fidouaf.marvin.Storage;
 import org.ebayopensource.fidouaf.marvin.client.config.InitConfig;
 import org.ebayopensource.fidouaf.marvin.client.op.Reg;
+import org.ebayopensource.fidouaf.marvin.client.op.UafMsgProcessException;
+import org.ebayopensource.fidouaf.marvin.client.op.UafRequestMsgParseException;
+import org.ebayopensource.fidouaf.marvin.client.op.UafResponseMsgParseException;
 import org.json.JSONObject;
 
 import br.edu.ifsc.mello.dummyuafclient.fidouaflib.Curl;
@@ -270,8 +273,17 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
             callingIntent.putExtras(extras);
             setResult(Activity.RESULT_OK, callingIntent);
             finishAndRemoveTask();
-        } catch (Exception e) {
-            Log.i("FIDOUAFClient", "processOp failed. e=" + e);
+        }catch(UafResponseMsgParseException e){
+            Log.i("FIDOUAFClient", "UafResponseMsgParseException. processOp failed. e=" + e.toString());
+            uafError(ErrorCode.PROTOCOL_ERROR.getID(), null);
+        }catch (UafRequestMsgParseException e){
+            Log.i("FIDOUAFClient", "UafRequestMsgParseException. processOp failed. e=" + e.toString());
+            uafError(ErrorCode.PROTOCOL_ERROR.getID(), null);
+        }catch (UafMsgProcessException e){
+            Log.i("FIDOUAFClient", "UafMsgProcessException. processOp failed. e=" + e.toString());
+            uafError(ErrorCode.PROTOCOL_ERROR.getID(), null);
+        }catch (Exception e) {
+            Log.i("FIDOUAFClient", "processOp failed. e=" + e.toString());
             uafError(ErrorCode.UNKNOWN.getID(), null);
         }
 

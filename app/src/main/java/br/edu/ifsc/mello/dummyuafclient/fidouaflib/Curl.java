@@ -40,34 +40,6 @@ public class Curl {
     private static final String POST_METHOD = "POST";
     private static final String GET_METHOD = "GET";
 
-    public static String getInSeparateThread(String url) {
-        GetAsyncTask async = new GetAsyncTask();
-        async.execute(url);
-        while (!async.isDone()) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        return async.getResult();
-    }
-
-    public static String postInSeparateThread(String url, String header, String data) {
-        PostAsyncTask async = new PostAsyncTask();
-        async.execute(url, header, data);
-        while (!async.isDone()) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        return async.getResult();
-    }
-
     public static HttpResponse get(String url) {
 
         HttpURLConnection urlConnection = null;
@@ -170,65 +142,5 @@ public class Curl {
         public int getHttpStatusCode() {
             return httpStatusCode;
         }
-    }
-
-}
-
-class GetAsyncTask extends AsyncTask<String, Integer, String> {
-
-    private String result = null;
-    private boolean done = false;
-
-    public boolean isDone() {
-        return done;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    @Override
-    protected String doInBackground(String... args) {
-        result = Curl.get(args[0]).getPayload();
-        done = true;
-        return result;
-    }
-
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    protected void onPostExecute(String result) {
-        this.result = result;
-        done = true;
-    }
-}
-
-class PostAsyncTask extends AsyncTask<String, Integer, String> {
-
-    private String result = null;
-    private boolean done = false;
-
-    public boolean isDone() {
-        return done;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    @Override
-    protected String doInBackground(String... args) {
-        result = Curl.post(args[0], args[1], args[2]).getPayload();//(url, header, data)
-        done = true;
-        return result;
-    }
-
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    @Override
-    protected void onPostExecute(String result) {
-        this.result = result;
-        done = true;
     }
 }
