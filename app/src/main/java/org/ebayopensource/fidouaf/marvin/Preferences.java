@@ -59,4 +59,16 @@ public class Preferences {
 		editor.apply();
 	}
 
+	public static void setSettingsParamBoolean(String paramName, boolean paramValue){
+		SharedPreferences settings = getPrefferences();
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean(paramName, paramValue);
+		editor.apply();
+	}
+
+	public static boolean getSettingsParamBoolean(String paramName){
+		SharedPreferences settings = getPrefferences();
+		return settings.getBoolean(paramName, true);
+	}
+
 }

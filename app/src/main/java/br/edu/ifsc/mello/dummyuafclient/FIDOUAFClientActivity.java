@@ -94,11 +94,11 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                             startActivity(new Intent(Settings.ACTION_SETTINGS));
                         }
                     }).show()
-            .setOnCancelListener(new DialogInterface.OnCancelListener(){
-                public void onCancel(DialogInterface dialog){
-                    finish();
-                }
-            });
+                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        public void onCancel(DialogInterface dialog) {
+                            finish();
+                        }
+                    });
         } else {
             // If fingerprint authentication is not available
             if (!mFingerprintUiHelper.isFingerprintAuthAvailable(this)) {
@@ -111,12 +111,12 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                                 startActivity(new Intent(Settings.ACTION_SETTINGS));
                             }
                         }).show()
-                        .setOnCancelListener(new DialogInterface.OnCancelListener(){
-                            public void onCancel(DialogInterface dialog){
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            public void onCancel(DialogInterface dialog) {
                                 finish();
                             }
                         });
-            } else{
+            } else {
                 mFingerprintContent.setVisibility(View.VISIBLE);
                 this.init();
                 this.callingIntent = getIntent();
@@ -127,7 +127,8 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                         countdownPB.setProgress(countdownPB.getProgress() - 1);
                     }
 
-                    public void onFinish() {uafError(ErrorCode.USER_CANCELLED.getID(), null);
+                    public void onFinish() {
+                        uafError(ErrorCode.USER_CANCELLED.getID(), null);
                     }
                 }.start();
             }
@@ -256,13 +257,18 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
         extras.putString("UAFIntentType", UAFIntentType.UAF_OPERATION_RESULT.name());
 
         String response = "";
-        if (getAppId) {
-            if (!FidoUafUtils.isFacetIdValid(trustedFacets, new Version(1, 0), appFacetId)) {
-                extras.putShort("errorCode", ErrorCode.UNTRUSTED_FACET_ID.getID());
-                extras.putString("message", response);
-                callingIntent.putExtras(extras);
-                setResult(Activity.RESULT_CANCELED, callingIntent);
-                finishAndRemoveTask();
+
+        boolean allowUntrustedAppId = Preferences.getSettingsParamBoolean("allowuntrusted");
+
+        if (!allowUntrustedAppId) {
+            if (getAppId) {
+                if (!FidoUafUtils.isFacetIdValid(trustedFacets, new Version(1, 0), appFacetId)) {
+                    extras.putShort("errorCode", ErrorCode.UNTRUSTED_FACET_ID.getID());
+                    extras.putString("message", response);
+                    callingIntent.putExtras(extras);
+                    setResult(Activity.RESULT_CANCELED, callingIntent);
+                    finishAndRemoveTask();
+                }
             }
         }
 
@@ -279,16 +285,16 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
             callingIntent.putExtras(extras);
             setResult(Activity.RESULT_OK, callingIntent);
             finishAndRemoveTask();
-        }catch(UafResponseMsgParseException e){
+        } catch (UafResponseMsgParseException e) {
             Log.i("FIDOUAFClient", "UafResponseMsgParseException. processOp failed. e=" + e.toString());
             uafError(ErrorCode.PROTOCOL_ERROR.getID(), null);
-        }catch (UafRequestMsgParseException e){
+        } catch (UafRequestMsgParseException e) {
             Log.i("FIDOUAFClient", "UafRequestMsgParseException. processOp failed. e=" + e.toString());
             uafError(ErrorCode.PROTOCOL_ERROR.getID(), null);
-        }catch (UafMsgProcessException e){
+        } catch (UafMsgProcessException e) {
             Log.i("FIDOUAFClient", "UafMsgProcessException. processOp failed. e=" + e.toString());
             uafError(ErrorCode.PROTOCOL_ERROR.getID(), null);
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.i("FIDOUAFClient", "processOp failed. e=" + e.toString());
             uafError(ErrorCode.UNKNOWN.getID(), null);
         }
@@ -340,8 +346,8 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                                     dialog.cancel();
                                 }
                             })
-                            .setOnCancelListener(new DialogInterface.OnCancelListener(){
-                                public void onCancel(DialogInterface dialog){
+                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                public void onCancel(DialogInterface dialog) {
                                     finish();
                                 }
                             }).show();

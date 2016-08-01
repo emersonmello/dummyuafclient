@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
     android:background="@android:color/white"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:layout_marginTop="@dimen/activity_vertical_margin"
     tools:context="br.edu.ifsc.mello.dummyuafclient.MainActivity"
     tools:showIn="@layout/activity_main">
 
@@ -14,14 +14,14 @@
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:orientation="vertical"
         android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@android:color/white"
+        android:gravity="center"
+        android:orientation="vertical"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:gravity="center">
+        android:paddingTop="@dimen/activity_vertical_margin">
 
         <TextView
             android:id="@+id/textView"
@@ -49,7 +49,24 @@
             android:onClick="showAuthListActivity"
             android:text="Authenticator List" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@drawable/card"
+            android:padding="@dimen/activity_vertical_margin"
+            android:elevation="4dp"
+            android:orientation="vertical">
 
+            <Switch
+                android:id="@+id/allowuntrusted"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:onClick="allowUntrusted"
+                android:text="Allow untrusted RP Application"
+                style="@style/Base.TextAppearance.AppCompat.Medium" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
