@@ -24,15 +24,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.ebayopensource.fidouaf.marvin.ApplicationContextProvider;
-import org.ebayopensource.fidouaf.marvin.client.msg.Version;
-import org.ebayopensource.fidouaf.marvin.client.msg.client.UAFIntentType;
-import org.ebayopensource.fidouaf.marvin.client.op.Auth;
-import org.ebayopensource.fidouaf.marvin.client.op.Dereg;
 import org.ebayopensource.fidouaf.marvin.OperationalParams;
 import org.ebayopensource.fidouaf.marvin.Preferences;
 import org.ebayopensource.fidouaf.marvin.Storage;
 import org.ebayopensource.fidouaf.marvin.client.config.InitConfig;
+import org.ebayopensource.fidouaf.marvin.client.msg.Version;
+import org.ebayopensource.fidouaf.marvin.client.msg.client.UAFIntentType;
+import org.ebayopensource.fidouaf.marvin.client.op.Auth;
+import org.ebayopensource.fidouaf.marvin.client.op.Dereg;
 import org.ebayopensource.fidouaf.marvin.client.op.Reg;
 import org.ebayopensource.fidouaf.marvin.client.op.UafMsgProcessException;
 import org.ebayopensource.fidouaf.marvin.client.op.UafRequestMsgParseException;
@@ -43,7 +42,6 @@ import br.edu.ifsc.mello.dummyuafclient.fidouaflib.Curl;
 import br.edu.ifsc.mello.dummyuafclient.fidouaflib.DiscoveryData;
 import br.edu.ifsc.mello.dummyuafclient.fidouaflib.ErrorCode;
 import br.edu.ifsc.mello.dummyuafclient.fidouaflib.FidoUafUtils;
-
 
 import static br.edu.ifsc.mello.dummyuafclient.fidouaflib.ErrorCode.NO_ERROR;
 
@@ -66,10 +64,6 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fingerprint_dialog_container);
-
-        mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
-        mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-
         mFingerprintContent = this.findViewById(R.id.fingerprint_container);
         mCancelButton = (Button) this.findViewById(R.id.cancel_button);
         mCancelButton.setOnClickListener(new View.OnClickListener() {
@@ -80,6 +74,9 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
         });
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
+
+        mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+        mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         mFingerprintUiHelperBuilder = new FingerprintUiHelper.FingerprintUiHelperBuilder(mFingerprintManager);
 
         mFingerprintUiHelper = mFingerprintUiHelperBuilder.build(
@@ -94,9 +91,14 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                     .setPositiveButton(R.string.button_go_to_settings, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+                            startActivity(new Intent(Settings.ACTION_SETTINGS));
                         }
-                    }).show();
+                    }).show()
+            .setOnCancelListener(new DialogInterface.OnCancelListener(){
+                public void onCancel(DialogInterface dialog){
+                    finish();
+                }
+            });
         } else {
             // If fingerprint authentication is not available
             if (!mFingerprintUiHelper.isFingerprintAuthAvailable(this)) {
@@ -106,26 +108,30 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                         .setPositiveButton(R.string.button_go_to_settings, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+                                startActivity(new Intent(Settings.ACTION_SETTINGS));
                             }
-                        }).show();
-            } else {
+                        }).show()
+                        .setOnCancelListener(new DialogInterface.OnCancelListener(){
+                            public void onCancel(DialogInterface dialog){
+                                finish();
+                            }
+                        });
+            } else{
                 mFingerprintContent.setVisibility(View.VISIBLE);
+                this.init();
+                this.callingIntent = getIntent();
+                final ProgressBar countdownPB = (ProgressBar) findViewById(R.id.countdown_progress_bar);
+                countdownPB.setProgress(100);
+                new CountDownTimer(12000, 100) {
+                    public void onTick(long millisUntilFinished) {
+                        countdownPB.setProgress(countdownPB.getProgress() - 1);
+                    }
+
+                    public void onFinish() {uafError(ErrorCode.USER_CANCELLED.getID(), null);
+                    }
+                }.start();
             }
         }
-        this.callingIntent = getIntent();
-        this.init();
-        final ProgressBar countdownPB = (ProgressBar) findViewById(R.id.countdown_progress_bar);
-        countdownPB.setProgress(100);
-        new CountDownTimer(10000, 100) {
-            public void onTick(long millisUntilFinished) {
-                countdownPB.setProgress(countdownPB.getProgress() - 1);
-            }
-
-            public void onFinish() {
-                uafError(ErrorCode.USER_CANCELLED.getID(), null);
-            }
-        }.start();
     }
 
     private void init() {
@@ -171,7 +177,7 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
     public void processUAFIntentType(Intent intent) {
         this.callingIntent = intent;
 
-        String callingPackageName = getPackageName();
+        String callingPackageName = getCallingPackage();
         Preferences.setSettingsParam("callingPackageName", callingPackageName);
 
         Bundle extras = intent.getExtras();
@@ -332,6 +338,11 @@ public class FIDOUAFClientActivity extends AppCompatActivity implements Fingerpr
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.cancel();
+                                }
+                            })
+                            .setOnCancelListener(new DialogInterface.OnCancelListener(){
+                                public void onCancel(DialogInterface dialog){
+                                    finish();
                                 }
                             }).show();
                 }

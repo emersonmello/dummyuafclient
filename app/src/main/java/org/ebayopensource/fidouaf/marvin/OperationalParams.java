@@ -22,7 +22,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
@@ -44,9 +43,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.logging.Logger;
 
 import br.edu.ifsc.mello.dummyuafclient.fidouaflib.AttachmentHintEnum;
@@ -256,6 +252,7 @@ public class OperationalParams implements OperationalParamsIntf {
                     comma = ",";
                 }
             }
+            Log.d("dummyclient","getFacetId: " +  ret.toString());
             return ret.toString();
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -293,11 +290,32 @@ public class OperationalParams implements OperationalParamsIntf {
             s.initSign(privateKey);
             s.update(SHA.sha(signedDataValue, "SHA-256"));
             signature = s.sign();
+
+            /********* Test **************/
+//            Log.i("TEST","Auth signature obtained...");
+//            java.security.Signature ss = java.security.Signature.getInstance("SHA256withECDSA");
+//            KeyFactory kf = KeyFactory.getInstance("EC");
+//
+//            KeyFactory factory = KeyFactory.getInstance(privateKey.getAlgorithm(), "AndroidKeyStore");
+//            KeyInfo keyInfo = (KeyInfo) factory.getKeySpec(privateKey, KeyInfo.class);
+//            Certificate certificate = ks.getCertificate(keyId);
+//            PublicKey publicKey = certificate.getPublicKey();
+//            String pkString = android.util.Base64.encodeToString(publicKey.getEncoded(), android.util.Base64.DEFAULT);
+//
+//            Log.i("TEST", "PublicKey: " + pkString);
+//            ss.initVerify(kf.generatePublic(new X509EncodedKeySpec(publicKey.getEncoded())));
+//            ss.update(SHA.sha(signedDataValue, "SHA-256"));
+//            if(!ss.verify(signature)){
+//                Log.i("TEST","verify failed.");
+//            }
+//            Log.i("TEST","Auth signature verified...");
+            /********* Test **************/
+
         } catch (KeyPermanentlyInvalidatedException invalidatedKeyException) {
             //Can happen when user removes the screen lock
             throw new Exception("KeyInvalidatedByAndroidKeyStore");
         } catch (Exception e) {
-            throw new Exception("SystemError");
+            throw new Exception("SystemError: " + e.toString());
         }
         return signature;
     }
