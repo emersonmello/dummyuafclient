@@ -1,5 +1,7 @@
 # Dummy FIDO UAF Client for Android
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.375567.svg)](https://doi.org/10.5281/zenodo.375567)
+
 It is a dummy FIDO UAF Client suitable to conduct development tests on Android smartphones that are not FIDO Ready
 
 - This client is heavily based on [eBay UAF open source project](https://github.com/eBay/UAF)
